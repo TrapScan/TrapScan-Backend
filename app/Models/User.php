@@ -50,7 +50,7 @@ class User extends Authenticatable
     }
 
     public function inspections() {
-        return $this->hasMany(Inspections::class, 'recorded_by', 'id');
+        return $this->hasMany(Inspection::class, 'recorded_by', 'id');
     }
 
     public function profile() {

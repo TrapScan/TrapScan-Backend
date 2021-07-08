@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Inspections;
+use App\Models\Inspection;
 use App\Models\Project;
 use App\Models\Trap;
 use App\Models\TrapLine;
@@ -19,10 +19,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $userCount = 20;
-        $projectCount = 10;
-        $trapCount = 10;
-        $inspectionsCount = 3;
+        $userCount = 50;
+        $projectCount = 20;
+        $trapCount = 20;
+        $inspectionsCount = 5;
         $trapLinesCount = 2; // Keep less than projectCount
 
         $users = User::factory($userCount)->create();
@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
             foreach ($user->projects as $userProject) {
                 foreach ($userProject->traps as $userTrap) {
                     $rand = rand(0, $inspectionsCount);
-                    Inspections::factory($rand)->create([
+                    Inspection::factory($rand)->create([
                         'recorded_by' => $user->id,
                         'trap_id' => $userTrap->id
                     ]);
@@ -61,6 +61,20 @@ class DatabaseSeeder extends Seeder
                 ])->first();
                 $trapLine->traps()->saveMany($traps);
             }
+        }
+
+        // Some constants
+        if(! User::where('email', 'dylan@dylanhobbs.ie')->exists()){
+            User::factory()->create([
+               'email' => 'dylan@dylanhobbs.ie',
+               'password' => bcrypt('password')
+            ]);
+        }
+        if(! Trap::where('qr_id', 'Test-1234')->exists() && Project::find(1)->exists()){
+            Trap::factory()->create([
+                'qr_id' => 'Test-1234',
+                'project_id' => Project::find(1)->get()->first()->id
+            ]);
         }
     }
 }

@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\Inspections;
+use App\Models\Inspection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InspectionsFactory extends Factory
+class InspectionFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Inspections::class;
+    protected $model = Inspection::class;
 
     /**
      * Define the model's default state.

@@ -30,6 +30,6 @@ class Trap extends Model
     }
 
     public function inspections() {
-        return $this->hasMany(Inspections::class);
+        return $this->hasMany(Inspection::class);
     }
 }

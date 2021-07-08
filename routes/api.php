@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\APIController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\InspectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +21,16 @@ use Illuminate\Support\Facades\Route;
 //    return $request->user();
 //});
 
+
+Route::get('/login/{provider}', [LoginController::class, 'redirectToProvider']);
+Route::get('login/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::prefix('inspection')->group(function () {
+    Route::post('/create', [InspectionController::class, 'create']);
+    Route::get('/show/{inspection}', [InspectionController::class, 'show']);
+//    Route::get('/user', [UserController::class, 'index']);
 });

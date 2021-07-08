@@ -2,10 +2,17 @@
 
 namespace App\Models;
 
+use Barryvdh\LaravelIdeHelper\Eloquent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Inspections extends Model
+/**
+ * Class Inspection
+ * @package App\Models
+ *
+ * @mixin Eloquent
+ */
+class Inspection extends Model
 {
     use HasFactory;
 
