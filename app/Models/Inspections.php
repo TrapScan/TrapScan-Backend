@@ -28,6 +28,6 @@ class Inspections extends Model
     }
 
     public function user() {
-        return $this->hasOne(User::class);
+        return $this->hasOne(User::class, 'recorded_by', 'id');
     }
 }

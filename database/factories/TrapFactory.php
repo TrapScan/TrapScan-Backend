@@ -22,10 +22,8 @@ class TrapFactory extends Factory
     public function definition()
     {
         return [
-//            'nz_trap_id' => $this->faker->numberBetween(1, 100000),
-//            'qr_id' => getUniqueTrapId(),
-//            'project_id' =>
-//            'user_id',
+            'nz_trap_id' => $this->faker->numberBetween(1, 100000),
+            'qr_id' => getUniqueTrapId(),
         ];
     }
 }

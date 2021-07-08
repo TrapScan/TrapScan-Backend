@@ -12,6 +12,7 @@ class Trap extends Model
     protected $fillable = [
         'nz_trap_id',
         'qr_id',
+        'trap_line_id',
         'project_id',
         'user_id',
     ];
@@ -26,5 +27,9 @@ class Trap extends Model
 
     public function owner() {
         return $this->belongsTo(User::class);
+    }
+
+    public function inspections() {
+        return $this->hasMany(Inspections::class);
     }
 }

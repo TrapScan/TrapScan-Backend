@@ -16,7 +16,7 @@ class CreateTrapsTable extends Migration
         Schema::create('traps', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('nz_trap_id')->nullable();
-            $table->foreignId('trapline_id')->nullable();
+            $table->foreignId('trap_line_id')->nullable();
             $table->string('qr_id')->nullable();
             $table->foreignId('project_id')->nullable();
             $table->foreignId('user_id')->nullable();
@@ -24,7 +24,7 @@ class CreateTrapsTable extends Migration
             $table->index('qr_id');
             $table->index('nz_trap_id');
 
-            $table->foreign('trapline_id')->references('id')->on('traps');
+            $table->foreign('trap_line_id')->references('id')->on('traps');
             $table->foreign('project_id')->references('id')->on('projects');
             $table->foreign('user_id')->references('id')->on('users');
 
