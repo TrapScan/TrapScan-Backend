@@ -32,4 +32,12 @@ class Trap extends Model
     public function inspections() {
         return $this->hasMany(Inspection::class);
     }
+
+    public function scopeUnmapped($query) {
+        return $query->whereNull('nz_trap_id')->whereNull('trap_line_id')->whereNull('project_id')->whereNull('user_id');
+    }
+
+    public function scopeUnmappedInProject($query) {
+        return $query->whereNull('nz_trap_id')->whereNull('trap_line_id')->whereNull('user_id');
+    }
 }

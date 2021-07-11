@@ -3,6 +3,7 @@
 use App\Http\Controllers\APIController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\QRController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,12 +26,31 @@ use Illuminate\Support\Facades\Route;
 Route::get('/login/{provider}', [LoginController::class, 'redirectToProvider']);
 Route::get('login/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
+
+/*
+ * Login Protected Routes
+ */
+Route::middleware('auth:sanctum')->group(function() {
+    Route::get('/user',  function (Request $request) {
+        return $request->user();
+    });
+
+    Route::prefix('inspection')->group(function () {
+        Route::post('/create', [InspectionController::class, 'create']);
+        Route::get('/show/{inspection}', [InspectionController::class, 'show']);
+    });
+
+    /*
+     * Admin Protected Routes
+     */
+    Route::prefix('admin')->middleware('role:admin')->group(function() {
+        Route::post('/qr/create', [QRController::class, 'create']);
+        Route::get('/qr/unmapped', [QRController::class, 'unmapped']);
+        Route::get('qr/unmapped/{project}', [QRController::class, 'unmappedInProject']);
+    });
 });
 
-Route::prefix('inspection')->group(function () {
-    Route::post('/create', [InspectionController::class, 'create']);
-    Route::get('/show/{inspection}', [InspectionController::class, 'show']);
-//    Route::get('/user', [UserController::class, 'index']);
-});
+
