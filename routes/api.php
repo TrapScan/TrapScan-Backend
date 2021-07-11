@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function() {
      */
     Route::prefix('admin')->middleware('role:admin')->group(function() {
         Route::post('/qr/create', [QRController::class, 'create']);
+        Route::post('/qr/create/{project}', [QRController::class, 'createInProject']);
         Route::get('/qr/unmapped', [QRController::class, 'unmapped']);
         Route::get('qr/unmapped/{project}', [QRController::class, 'unmappedInProject']);
     });
