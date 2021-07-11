@@ -35,7 +35,7 @@ Route::get('login/{provider}/callback', [LoginController::class, 'handleProvider
  */
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user',  function (Request $request) {
-        return $request->user();
+        return $request->user()->load('roles');
     });
 
     Route::prefix('inspection')->group(function () {
