@@ -4,9 +4,26 @@ TrapScan backend uses Laravel 8.
 
 You can setup a dev environment using Docker with Laravel Sail.
 
-1) Install Docker
-2) Clone this repository
-3) Run ``sail artisan migrate:fresh --seed`` to setup and populate the database
+##### 1. Install Docker
+https://www.docker.com/products/docker-desktop
+Start the program
+##### 2. Clone Repo
+```git clone git@github.com:KurtisPapple/TrapScan-Backend.git```
+
+##### 3. Run Laravel Sail
+https://laravel.com/docs/8.x/sail
+
+``cd trapscan-backend``
+
+``./vendor/bin/sail up``
+
+##### 4. Run Migration and Seeders
+``sail artisan migrate:fesh --seed``
+
+##### 5. Running
+http://localhost will be the main app
+http://localhost:8090 has a phpmyadmin instance (credentials can be found in your .env)
+
 
 ## Learning Laravel
 
