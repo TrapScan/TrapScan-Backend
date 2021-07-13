@@ -59,4 +59,20 @@ class QRController extends Controller
     public function unmappedInProject(Project $project) {
         return Trap::where('project_id', $project->id)->unmappedInProject()->get();
     }
+
+    public function mapQRCode(Request $request) {
+        $validated_data = $request->validate([
+           'nz_id' => 'required',
+           'qr_code' => 'required'
+        ]);
+
+        $trap = Trap::where('qr_id', $validated_data['qr_code'])->first();
+        if(! $trap){
+            // Create it?
+        }
+        $trap->nz_id = $validated_data['nz_id'];
+        $trap->save();
+
+        return response()->json(['message' => 'Trap has been assigned a NZ trap ID']);
+    }
 }

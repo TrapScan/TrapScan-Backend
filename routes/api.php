@@ -50,7 +50,8 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::post('/qr/create', [QRController::class, 'create']);
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject']);
         Route::get('/qr/unmapped', [QRController::class, 'unmapped']);
-        Route::get('qr/unmapped/{project}', [QRController::class, 'unmappedInProject']);
+        Route::get('/qr/unmapped/{project}', [QRController::class, 'unmappedInProject']);
+        Route::post('/qr/map', [QRController::class, 'mapQRCode']);
     });
 });
 
