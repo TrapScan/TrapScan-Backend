@@ -62,8 +62,8 @@ class QRController extends Controller
 
     public function mapQRCode(Request $request) {
         $validated_data = $request->validate([
-           'nz_id' => 'required',
-           'qr_code' => 'required'
+            'nz_id' => 'required',
+            'qr_code' => 'required'
         ]);
 
         $trap = Trap::where('qr_id', $validated_data['qr_code'])->first();
