@@ -26,5 +26,7 @@ class Project extends Model
         return $this->belongsToMany(User::class);
     }
 
-
+    public function coordinators() {
+        return $this->users()->wherePivot('coordinator', '=', true);
+    }
 }

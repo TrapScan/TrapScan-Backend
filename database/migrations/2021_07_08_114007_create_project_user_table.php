@@ -17,6 +17,7 @@ class CreateProjectUserTable extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('project_id');
+            $table->boolean('coordinator')->default(false);
             $table->timestamps();
         });
     }

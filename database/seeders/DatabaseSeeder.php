@@ -50,6 +50,17 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Add the first user in each project as the coordinator
+        $project_collection = Project::all();
+        foreach ($project_collection as $project) {
+            if($project->users()->exists()) {
+                $user = $project->users()->first();
+                $user->projects()->updateExistingPivot($project->id, [
+                    'coordinator' => true
+                ]);
+            }
+        }
+
         // Create a couple traplines with half of the traps from a project
         for($i=0; $i < $trapLinesCount; $i++) {
             $project = Project::all()->random(1)->first();

@@ -61,4 +61,14 @@ class User extends Authenticatable
     public function providers() {
         return $this->hasMany(Provider::class, 'user_id', 'id');
     }
+
+    public function coordinatorOf() {
+        return $this->projects()->wherePivot('coordinator', '=', true)->get();
+    }
+
+    public function isCoordinatorOf(Project $project) {
+        return $this->projects()->wherePivot('coordinator', '=', true)
+            ->where('project_id', $project->id)
+            ->exists();
+    }
 }
