@@ -60,19 +60,52 @@ class QRController extends Controller
         return Trap::where('project_id', $project->id)->unmappedInProject()->get();
     }
 
-    public function mapQRCode(Request $request) {
+    /*
+     * This endpoint will be called only by admin users from the admin tool
+     * This will facilitate bulk assignment if needed
+     *
+     * TODO: This method can be removed if that tool will be doing nothing extra (than mapQRCode())
+     */
+    public function mapQRCodeAdmin(Request $request) {
         $validated_data = $request->validate([
-            'nz_id' => 'required',
-            'qr_code' => 'required'
+            'qr_id' => 'required|exists:traps,qr_id',
+            'nz_id' => 'required'
         ]);
-
-        $trap = Trap::where('qr_id', $validated_data['qr_code'])->first();
-        if(! $trap){
-            // Create it?
-        }
-        $trap->nz_id = $validated_data['nz_id'];
+        $trap = Trap::where('qr_id', $validated_data['qr_id'])->first();
+        $trap->nz_trap_id = $validated_data['nz_id'];
         $trap->save();
 
-        return response()->json(['message' => 'Trap has been assigned a NZ trap ID']);
+        return $trap;
+    }
+
+    /*
+     * This function will be called by general users from the scanning application
+     */
+    public function mapQRCode(Request $request) {
+        $validated_data = $request->validate([
+            'qr_id' => 'required|exists:traps,qr_id',
+            'nz_id' => 'required'
+        ]);
+        $user = $request->user();
+        $project = Trap::where('qr_id', $validated_data['qr_id'])->first()->project;
+
+        // Do some extra validation if the user is not admin
+        if(! $request->user()->hasRole('admin')) {
+            // Check if the user is a pcord for this trap
+            if( $user->isCoordinatorOf($project)) {
+                $trap = Trap::where('qr_id', $validated_data['qr_id'])->first();
+                $trap->nz_trap_id = $validated_data['nz_id'];
+                $trap->save();
+
+                return $trap;
+            } else {
+                return response()->json(['Message' => 'You are not a coordinator for this project'], 403);
+            }
+        } else {
+            // Allow admins to rewrite codes without checking
+            $trap = Trap::where('qr_id', $validated_data['qr_id'])->first();
+            $trap->nz_trap_id = $validated_data['nz_id'];
+            $trap->save();
+        }
     }
 }

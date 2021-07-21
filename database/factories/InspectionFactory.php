@@ -12,7 +12,7 @@ class InspectionFactory extends Factory
      *
      * @var string
      */
-    protected $model = Inspection::class;
+    protected string $model = Inspection::class;
 
     /**
      * Define the model's default state.

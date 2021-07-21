@@ -8,6 +8,7 @@ use App\Models\Trap;
 use App\Models\TrapLine;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 use function Symfony\Component\Translation\t;
 
 class DatabaseSeeder extends Seeder
@@ -74,17 +75,36 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // Some constants
-        if(! User::where('email', 'dylan@dylanhobbs.ie')->exists()){
-            User::factory()->create([
-               'email' => 'dylan@dylanhobbs.ie',
-               'password' => bcrypt('password')
-            ]);
-        }
+        /*
+         * Some Constants for Dev
+         */
+        // Create a sample trap for testing
         if(! Trap::where('qr_id', 'Test-1234')->exists() && Project::find(1)->exists()){
             Trap::factory()->create([
                 'qr_id' => 'Test-1234',
                 'project_id' => Project::find(1)->get()->first()->id
+            ]);
+        }
+        // Create an admin user for Dylan
+        if(! User::where('email', 'dylan@dylanhobbs.ie')->exists()){
+            $user = User::factory()->create([
+                'email' => 'dylan@dylanhobbs.ie',
+                'password' => bcrypt('password')
+            ]);
+
+            // Create the admin role
+            if(! Role::where('name', 'admin')->exists()) {
+                Role::create(['name' => User::ADMIN_ROLE]);
+            }
+
+            $user->assignRole(User::ADMIN_ROLE);
+            $user->save();
+        }
+        // Create a normal user for Dylan
+        if(! User::where('email', 'dylan.user@dylanhobbs.ie')->exists()) {
+            $user = User::factory()->create([
+                'email' => 'dylan.user@dylanhobbs.ie',
+                'password' => bcrypt('password')
             ]);
         }
     }

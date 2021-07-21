@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Project;
 use App\Models\Trap;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,7 +13,7 @@ class TrapFactory extends Factory
      *
      * @var string
      */
-    protected $model = Trap::class;
+    protected string $model = Trap::class;
 
     /**
      * Define the model's default state.
@@ -25,5 +26,27 @@ class TrapFactory extends Factory
             'nz_trap_id' => $this->faker->numberBetween(1, 100000),
             'qr_id' => getUniqueTrapId(),
         ];
+    }
+
+    public function unmapped() {
+        return $this->state(function (array $attributes) {
+           return [
+               'nz_trap_id' => null,
+               'trap_line_id' => null,
+               'project_id' => null,
+               'user_id' => null
+           ];
+        });
+    }
+
+    public function unmappedInProject(Project $project) {
+        return $this->state(function (array $attributes) use($project) {
+            return [
+                'nz_trap_id' => null,
+                'trap_line_id' => null,
+                'project_id' => $project->id,
+                'user_id' => null
+            ];
+        });
     }
 }

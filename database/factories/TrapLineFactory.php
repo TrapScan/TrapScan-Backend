@@ -12,7 +12,7 @@ class TrapLineFactory extends Factory
      *
      * @var string
      */
-    protected $model = TrapLine::class;
+    protected string $model = TrapLine::class;
 
     /**
      * Define the model's default state.

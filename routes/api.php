@@ -36,23 +36,36 @@ Route::get('login/{provider}/callback', [LoginController::class, 'handleProvider
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user',  function (Request $request) {
         return $request->user()->load('roles');
-    });
+    })->name('user.info');
 
     Route::prefix('inspection')->group(function () {
-        Route::post('/create', [InspectionController::class, 'create']);
-        Route::get('/show/{inspection}', [InspectionController::class, 'show']);
+        Route::post('/create', [InspectionController::class, 'create'])
+            ->name('inspection.create');
+        Route::get('/show/{inspection}', [InspectionController::class, 'show'])
+            ->name('inspection.show');
     });
 
     /*
      * Admin Protected Routes
      */
     Route::prefix('admin')->middleware('role:admin')->group(function() {
-        Route::post('/qr/create', [QRController::class, 'create']);
-        Route::post('/qr/create/{project}', [QRController::class, 'createInProject']);
-        Route::get('/qr/unmapped', [QRController::class, 'unmapped']);
-        Route::get('/qr/unmapped/{project}', [QRController::class, 'unmappedInProject']);
-        Route::post('/qr/map', [QRController::class, 'mapQRCode']);
+        Route::post('/qr/create', [QRController::class, 'create'])
+            ->name('admin.qr.create');
+        Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
+            ->name('admin.qr.create.project');
+        Route::get('/qr/unmapped', [QRController::class, 'unmapped'])
+            ->name('admin.qr.unmapped');
+        Route::get('/qr/unmapped/{project}', [QRController::class, 'unmappedInProject'])
+            ->name('admin.qr.unmapped.project');
+        Route::post('/qr/map', [QRController::class, 'mapQRCodeAdmin'])
+            ->name('admin.qr.map');
     });
+
+    /*
+     * User Accessible QR routes
+     */
+    Route::post('/qr/map', [QRController::class, 'mapQRCode'])
+        ->name('qr.map');
 });
 
 

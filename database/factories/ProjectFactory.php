@@ -12,7 +12,7 @@ class ProjectFactory extends Factory
      *
      * @var string
      */
-    protected $model = Project::class;
+    protected string $model = Project::class;
 
     /**
      * Define the model's default state.
