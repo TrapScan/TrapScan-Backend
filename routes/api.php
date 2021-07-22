@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\QRController;
 use App\Http\Controllers\ScanController;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,14 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user',  function (Request $request) {
         return $request->user()->load('roles');
     })->name('user.info');
+    Route::get('/user/isCoordinator/{project}',  function (Request $request, Project $project) {
+        $coord = $request->user()->isCoordinatorOf($project);
+        if($coord) {
+            return response()->json([true], 200);
+        } else {
+            return response()->json([false], 400);
+        }
+    })->name('user.is.coordinator');
 
     Route::prefix('inspection')->group(function () {
         Route::post('/create', [InspectionController::class, 'create'])
