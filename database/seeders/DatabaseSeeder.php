@@ -107,5 +107,17 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('password')
             ]);
         }
+//        // Make the normal user for Dylan a pcord on project id 1
+//        if(! Project::find(1)->users()
+//            ->where('email', 'dylan.user@dylanhobbs.ie')->exists()) {
+//            $user = User::where('email', 'dylan.user@dylanhobbs.ie')->first();
+//            $project = Project::find(1);
+//            $user->projects()->save($project);
+//            $user->refresh();
+//
+//            $user->projects()->updateExistingPivot($project->id, [
+//                'coordinator' => true
+//            ]);
+//        }
     }
 }
