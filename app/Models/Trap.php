@@ -17,6 +17,10 @@ class Trap extends Model
         'user_id',
     ];
 
+    public function getRouteKeyName() {
+        return 'qr_id';
+    }
+
     public function trapline() {
         return $this->belongsTo(TrapLine::class);
     }

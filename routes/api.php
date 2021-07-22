@@ -4,6 +4,7 @@ use App\Http\Controllers\APIController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\QRController;
+use App\Http\Controllers\ScanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,19 @@ Route::middleware('auth:sanctum')->group(function() {
      */
     Route::post('/qr/map', [QRController::class, 'mapQRCode'])
         ->name('qr.map');
+
+    /*
+     * Field Scanning Code
+     */
+    Route::get('/scan/{qr_id}', [ScanController::class, 'scan'])
+        ->name('scan.qr');
 });
+
+Route::prefix('anon')->group(function () {
+    Route::get('/scan/{qr_id}', [ScanController::class, 'anonScan'])
+        ->name('scan.qr');
+});
+
+
 
 
