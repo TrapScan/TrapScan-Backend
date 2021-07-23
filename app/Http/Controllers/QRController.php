@@ -75,7 +75,10 @@ class QRController extends Controller
         $trap->nz_trap_id = $validated_data['nz_id'];
         $trap->save();
 
-        return $trap;
+        return response()->json([
+            'trap' => $trap,
+            'message' => 'Trap has been mapped successfully'
+        ]);
     }
 
     /*
