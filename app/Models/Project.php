@@ -29,4 +29,8 @@ class Project extends Model
     public function coordinators() {
         return $this->users()->wherePivot('coordinator', '=', true);
     }
+
+    public function inspections() {
+        return $this->hasManyThrough(Inspection::class, Trap::class);
+    }
 }
