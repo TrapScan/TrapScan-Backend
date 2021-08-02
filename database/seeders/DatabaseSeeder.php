@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
         $inspectionsCount = 5;
         $trapLinesCount = 2; // Keep less than projectCount
 
-        $users = User::factory($userCount)->create();
+        $settings = ['settings' => ['theme' => 'default', 'dark_mode' => true]];
+        $users = User::factory($userCount)->create($settings);
         $projects = Project::factory($projectCount)->has(
             Trap::factory()->count($trapCount)
         )->create()->toArray();
@@ -85,11 +86,13 @@ class DatabaseSeeder extends Seeder
                 'project_id' => Project::find(1)->get()->first()->id
             ]);
         }
+
         // Create an admin user for Dylan
         if(! User::where('email', 'dylan@dylanhobbs.ie')->exists()){
             $user = User::factory()->create([
                 'email' => 'dylan@dylanhobbs.ie',
-                'password' => bcrypt('password')
+                'password' => bcrypt('password'),
+                'settings' => $settings['settings']
             ]);
 
             // Create the admin role
@@ -104,6 +107,7 @@ class DatabaseSeeder extends Seeder
         if(! User::where('email', 'dylan.user@dylanhobbs.ie')->exists()) {
             $user = User::factory()->create([
                 'email' => 'dylan.user@dylanhobbs.ie',
+                'settings' => $settings['settings'],
                 'password' => bcrypt('password')
             ]);
         }

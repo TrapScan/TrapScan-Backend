@@ -43,6 +43,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'settings' => 'array'
     ];
 
     public function projects() {
@@ -57,19 +58,9 @@ class User extends Authenticatable
         return $this->hasMany(Inspection::class, 'recorded_by', 'id');
     }
 
-    public function profile() {
-        return $this->hasOne(Profile::class);
-    }
-
     public function providers() {
         return $this->hasMany(Provider::class, 'user_id', 'id');
     }
-
-//    public function inspectionsPerProject(Project $project = null) {
-//        return $this->projects()->with(['traps.inspections' => function($query) {
-//            $query->where('recorded_by', $this->id);
-//        }])->get();
-//    }
 
     public function catches() {
         return $this->inspections()->whereNotNull('species_caught')->count();
@@ -87,7 +78,6 @@ class User extends Authenticatable
         return $data;
     }
 
-//User::with(['projects.traps.inspections' => function($query){$query->where('recorded_by', 1);}])->get()
     public function coordinatorOf() {
         return $this->projects()->wherePivot('coordinator', '=', true)->get();
     }
@@ -96,5 +86,18 @@ class User extends Authenticatable
         return $this->projects()->wherePivot('coordinator', '=', true)
             ->where('project_id', $project->id)
             ->exists();
+    }
+
+    public function setting($name, $default = null) {
+        if(array_key_exists($name, $this->settings)) {
+            return $this->settings[$name];
+        }
+        return $default;
+    }
+
+    public function setSetting(array $revisions) {
+        $this->settings = array_merge($this->settings, $revisions);
+        $this->save();
+        return $this;
     }
 }

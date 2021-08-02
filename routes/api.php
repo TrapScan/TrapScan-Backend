@@ -6,6 +6,7 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\QRController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\StatsController;
+use App\Http\Resources\UserResource;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,12 +27,18 @@ use Illuminate\Support\Facades\Route;
  */
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user',  function (Request $request) {
-        return \App\Http\Resources\UserResource::make($request->user()->load('roles'));
+        return UserResource::make($request->user()->load('roles'));
     })->name('user.info');
 
     Route::prefix('my')->group(function() {
         Route::get('/inspectionsPerProject', function(Request $request) {
             return $request->user()->inspectionCountPerProject();
+        });
+        Route::post('/settings', function(Request $request) {
+           $validated_data = $request->validate([
+               'settings' => 'required|array'
+           ]);
+           return UserResource::make($request->user()->setSetting($validated_data['settings']));
         });
     });
 

@@ -21,7 +21,8 @@ class UserResource extends JsonResource
             'updated_at' => $this->updated_at,
             'roles' => $this->roles ?? [],
             'inspections' => $this->inspections()->count(),
-            'catches' => $this->catches()
+            'catches' => $this->catches(),
+            'settings' => $this->settings
         ];
     }
 }
