@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\QRController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\StatsController;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,25 +21,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::middleware('auth:api')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
-
-
-Route::get('/login/{provider}', [LoginController::class, 'redirectToProvider']);
-Route::get('login/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
-
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
-
 /*
  * Login Protected Routes
  */
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user',  function (Request $request) {
-        return $request->user()->load('roles');
+        return \App\Http\Resources\UserResource::make($request->user()->load('roles'));
     })->name('user.info');
+
+    Route::prefix('my')->group(function() {
+        Route::get('/inspectionsPerProject', function(Request $request) {
+            return $request->user()->inspectionCountPerProject();
+        });
+    });
+
     Route::get('/user/isCoordinator/{project}',  function (Request $request, Project $project) {
         $coord = $request->user()->isCoordinatorOf($project);
         if($coord) {
@@ -84,11 +80,17 @@ Route::middleware('auth:sanctum')->group(function() {
         ->name('scan.qr');
 });
 
+/*
+ * Guest / Unprotected Routes
+ */
 Route::prefix('anon')->group(function () {
     Route::get('/scan/{qr_id}', [ScanController::class, 'anonScan'])
         ->name('scan.qr');
 });
 
-
+Route::prefix('stats')->group(function () {
+    Route::get('/kpi', [StatsController::class, 'kpis'])
+        ->name('stats.kpi');
+});
 
 

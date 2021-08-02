@@ -71,6 +71,10 @@ class User extends Authenticatable
 //        }])->get();
 //    }
 
+    public function catches() {
+        return $this->inspections()->whereNotNull('species_caught')->count();
+    }
+
     /*
      * Returns the simple project and inspection count for each of a users projects
      */
