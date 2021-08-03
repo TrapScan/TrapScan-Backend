@@ -118,4 +118,14 @@ Route::prefix('stats')->group(function () {
         ->name('stats.kpi');
 });
 
+Route::get('/mail', function(Request $request) {
+   $inspection = \App\Models\Inspection::find(20);
+   $trap = $inspection->trap;
+   $project = $trap->project;
+   $user = $inspection->user;
+
+   Mail::to('dylan@dylanhobbs.ie')
+       ->send(new \App\Mail\TrapCatch($inspection, $project, $user, $trap));
+});
+
 

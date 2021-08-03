@@ -31,10 +31,10 @@ class Inspection extends Model
     ];
 
     public function trap() {
-        return $this->hasOne(Trap::class);
+        return $this->belongsTo(Trap::class);
     }
 
     public function user() {
-        return $this->hasOne(User::class, 'recorded_by', 'id');
+        return $this->belongsTo(User::class, 'recorded_by', 'id');
     }
 }
