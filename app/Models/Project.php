@@ -9,6 +9,17 @@ class Project extends Model
 {
     use HasFactory;
 
+    const USER_PROJECT_COORDINATOR_SETTINGS = [
+        'notify_catches',
+        'notify_inspections',
+        'notify_problems'
+    ];
+    const USER_PROJECT_COORDINATOR_LABELS = [
+        'Catches',
+        'Inspections',
+        'Problems'
+    ];
+
     protected $fillable = [
         'name',
         'description'

@@ -78,8 +78,8 @@ class User extends Authenticatable
         return $data;
     }
 
-    public function coordinatorOf() {
-        return $this->projects()->wherePivot('coordinator', '=', true)->get();
+    public function isCoordinator() {
+        return $this->projects()->wherePivot('coordinator', '=', true)->withPivot(Project::USER_PROJECT_COORDINATOR_SETTINGS)->get();
     }
 
     public function isCoordinatorOf(Project $project) {
@@ -99,5 +99,18 @@ class User extends Authenticatable
         $this->settings = array_merge($this->settings, $revisions);
         $this->save();
         return $this;
+    }
+
+    public function setCoordinatorSettings(array $revision) {
+        $valid_keys = Project::USER_PROJECT_COORDINATOR_SETTINGS;
+        $project = Project::find($revision['project_id']);
+        // Check if it's a valid key
+        if (in_array($revision['key'], $valid_keys)) {
+            // Update the value
+            $this->projects()->updateExistingPivot($project, [$revision['key'] => $revision['value']]);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

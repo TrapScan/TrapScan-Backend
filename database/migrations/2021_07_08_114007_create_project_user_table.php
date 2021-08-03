@@ -18,6 +18,9 @@ class CreateProjectUserTable extends Migration
             $table->foreignId('user_id');
             $table->foreignId('project_id');
             $table->boolean('coordinator')->default(false);
+            $table->boolean('notify_catches')->default(true);
+            $table->boolean('notify_inspections')->default(false);
+            $table->boolean('notify_problems')->default(true);
             $table->timestamps();
         });
     }
