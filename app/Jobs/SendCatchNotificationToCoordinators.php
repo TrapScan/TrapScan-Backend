@@ -23,7 +23,7 @@ class SendCatchNotificationToCoordinators implements ShouldQueue
     protected $project;
     protected $user;
     protected $trap;
-    protected $usersToNotify;
+    protected $recipients;
 
     /**
      * Create a new job instance.
@@ -34,13 +34,24 @@ class SendCatchNotificationToCoordinators implements ShouldQueue
      * @param User $inspectionUser
      * @param Trap $trap
      */
-    public function __construct(Array $usersToNotify, Inspection $inspection, Project $project, User $inspectionUser, Trap $trap)
+    public function __construct(Inspection $inspection)
     {
+        $trap = $inspection->trap;
+        $project = $trap->project;
+        $user = $inspection->user;
+        $usersToNotify = $project->coordinators();
+
         $this->inspection = $inspection->withoutRelations();
         $this->trap = $trap->withoutRelations();
         $this->project = $project->withoutRelations();
-        $this->user = $inspectionUser->withoutRelations();
-        $this->usersToNotify = $usersToNotify;
+        $this->user = $user->withoutRelations();
+        $recipients = [];
+        foreach ($usersToNotify as $user) {
+            if($user->pivot->shouldNotify($this->inspection->species_caught)) {
+                $recipients[] = $user->email;
+            }
+        }
+        $this->recipients = $recipients;
     }
 
     /**
@@ -50,6 +61,10 @@ class SendCatchNotificationToCoordinators implements ShouldQueue
      */
     public function handle()
     {
-        //
+
+        if(count($this->recipients)) {
+            \Mail::to($this->recipients)
+                ->send(new TrapCatch($this->inspection, $this->project, $this->user, $this->trap));
+        }
     }
 }

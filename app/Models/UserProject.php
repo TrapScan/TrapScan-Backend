@@ -16,4 +16,19 @@ class UserProject extends Pivot
     public function hasCatchFilter() {
         return $this->catch_filter ? true : false;
     }
+
+    public function shouldNotify($species) {
+        if ($this->notify_catches) {
+            if ($this->catch_filter) {
+                if(in_array($species, $this->catch_filter)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
 }

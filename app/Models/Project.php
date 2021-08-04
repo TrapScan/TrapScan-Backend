@@ -39,7 +39,8 @@ class Project extends Model
     }
 
     public function coordinators() {
-        return $this->users()->wherePivot('coordinator', '=', true);
+        return $this->users()->wherePivot('coordinator', '=', true)
+            ->withPivot(self::USER_PROJECT_COORDINATOR_SETTINGS)->get();
     }
 
     public function inspections() {
