@@ -12,7 +12,8 @@ class Project extends Model
     const USER_PROJECT_COORDINATOR_SETTINGS = [
         'notify_catches',
         'notify_inspections',
-        'notify_problems'
+        'notify_problems',
+        'catch_filter'
     ];
     const USER_PROJECT_COORDINATOR_LABELS = [
         'Catches',
