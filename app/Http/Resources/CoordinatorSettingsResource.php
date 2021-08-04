@@ -16,6 +16,26 @@ class CoordinatorSettingsResource extends ResourceCollection
     public function toArray($request)
     {
         $projects = $this->collection;
+        $data_array = [];
+        if(count($projects)) {
+            $builder_array = [];
+            foreach ($projects as $project) {
+                $builder_array['id'] = $project->id;
+                $builder_array['notify_catches'] = $project->pivot->notify_catches;
+                $builder_array['name'] = $project->name;
+                $builder_array['catch_filter'] = $project->pivot->catch_filter ?? null;
+                $data_array[] = $builder_array;
+            }
+        }
+        return $data_array;
+    }
+
+    /*
+     * Previous format for dynamic coordination settings form
+     */
+    public function oldFormat($request)
+    {
+        $projects = $this->collection;
         $fields = Project::USER_PROJECT_COORDINATOR_SETTINGS;
         $labels = Project::USER_PROJECT_COORDINATOR_LABELS;
         $data_array = [];

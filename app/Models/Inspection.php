@@ -16,6 +16,10 @@ class Inspection extends Model
 {
     use HasFactory;
 
+    const VALID_SPECIES = ['Rat','Mouse','Stoat','Weasel','Hedgehog','Rat - Kiore','Rat - Norway','Unspecified','Bird',
+        'Rat - Ship','Cat','Deer','Dog','Ferret','Goat','Hare','Magpie','Peafowl','Pig','Possum','Rabbit','Turkey'];
+
+
     protected $fillable = [
         'date',
         'trap_id',
