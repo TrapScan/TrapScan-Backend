@@ -48,7 +48,7 @@ class User extends Authenticatable
     ];
 
     public function projects() {
-        return $this->belongsToMany(Project::class);
+        return $this->belongsToMany(Project::class)->using(UserProject::class);
     }
 
     public function traps() {
@@ -79,8 +79,8 @@ class User extends Authenticatable
         return $data;
     }
 
-    public function coordinatorOf() {
-        return $this->projects()->wherePivot('coordinator', '=', true)->get();
+    public function isCoordinator() {
+        return $this->projects()->wherePivot('coordinator', '=', true)->withPivot(Project::USER_PROJECT_COORDINATOR_SETTINGS)->get();
     }
 
     public function isCoordinatorOf(Project $project) {
@@ -100,5 +100,35 @@ class User extends Authenticatable
         $this->settings = array_merge($this->settings, $revisions);
         $this->save();
         return $this;
+    }
+
+    public function setCoordinatorSettings(array $revision) {
+        $valid_keys = Project::USER_PROJECT_COORDINATOR_SETTINGS;
+        $project = Project::find($revision['project_id']);
+        // Check if it's a valid key
+        if (in_array($revision['key'], $valid_keys)) {
+            // Update the value
+            $this->projects()->updateExistingPivot($project, [$revision['key'] => $revision['value']]);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function updateCatchFilter(array $revision) {
+        $project = Project::find($revision['project_id']);
+        $valid_species = Inspection::VALID_SPECIES;
+        $new_catch_filter = $revision['catch_filter'] ?? [];
+        $validated_catch_entices = [];
+        foreach ($new_catch_filter as $filter_item) {
+            if (in_array($filter_item, $valid_species)){
+                $validated_catch_entices[] = $filter_item;
+            }
+        }
+        if (count($validated_catch_entices) <= 0) {
+            $validated_catch_entices = null;
+        }
+        $this->projects()->updateExistingPivot($project, ['catch_filter' => $validated_catch_entices]);
+        return true;
     }
 }

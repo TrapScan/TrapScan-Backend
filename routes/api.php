@@ -6,6 +6,7 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\QRController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\StatsController;
+use App\Http\Resources\CoordinatorSettingsResource;
 use App\Http\Resources\UserResource;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -39,6 +40,35 @@ Route::middleware('auth:sanctum')->group(function() {
                'settings' => 'required|array'
            ]);
            return UserResource::make($request->user()->setSetting($validated_data['settings']));
+        });
+        Route::get('/coordinator/settings', function(Request $request) {
+           $projects = $request->user()->isCoordinator();
+           return CoordinatorSettingsResource::make($projects);
+        });
+        Route::post('/coordinator/settings', function(Request $request) {
+           // TODO: Possibly check coordinator status here of request->user()
+            $validated_data = $request->validate([
+                'key' => 'required',
+               'value' => 'required',
+               'project_id' => 'required|exists:projects,id'
+           ]);
+            if($request->user()->setCoordinatorSettings($validated_data)) {
+                return response()->json(['message' => 'Coordinator settings updated!'], 200);
+            } else {
+                return response()->json(['mesaage' => 'Error: Could not update coordinator settings'], 400);
+            }
+        });
+        Route::post('/coordinator/catch/filter', function(Request $request) {
+            // TODO: Possibly check coordinator status here of request->user()
+            $validated_data = $request->validate([
+                'catch_filter' => 'nullable|array',
+                'project_id' => 'required|exists:projects,id'
+            ]);
+            if($request->user()->updateCatchFilter($validated_data)) {
+                return response()->json(['message' => 'Catch filter updated!'], 200);
+            } else {
+                return response()->json(['mesaage' => 'Error: Could not update catch filter'], 400);
+            }
         });
     });
 
@@ -98,6 +128,16 @@ Route::prefix('anon')->group(function () {
 Route::prefix('stats')->group(function () {
     Route::get('/kpi', [StatsController::class, 'kpis'])
         ->name('stats.kpi');
+});
+
+Route::get('/mail', function(Request $request) {
+   $inspection = \App\Models\Inspection::find(20);
+   $trap = $inspection->trap;
+   $project = $trap->project;
+   $user = $inspection->user;
+
+   Mail::to('dylan@dylanhobbs.ie')
+       ->send(new \App\Mail\TrapCatch($inspection, $project, $user, $trap));
 });
 
 

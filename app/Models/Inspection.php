@@ -16,6 +16,10 @@ class Inspection extends Model
 {
     use HasFactory;
 
+    const VALID_SPECIES = ['Rat','Mouse','Stoat','Weasel','Hedgehog','Rat - Kiore','Rat - Norway','Unspecified','Bird',
+        'Rat - Ship','Cat','Deer','Dog','Ferret','Goat','Hare','Magpie','Peafowl','Pig','Possum','Rabbit','Turkey'];
+
+
     protected $fillable = [
         'date',
         'trap_id',
@@ -31,10 +35,10 @@ class Inspection extends Model
     ];
 
     public function trap() {
-        return $this->hasOne(Trap::class);
+        return $this->belongsTo(Trap::class);
     }
 
     public function user() {
-        return $this->hasOne(User::class, 'recorded_by', 'id');
+        return $this->belongsTo(User::class, 'recorded_by', 'id');
     }
 }
