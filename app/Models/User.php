@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'settings'
     ];
 
     /**
@@ -47,7 +48,7 @@ class User extends Authenticatable
     ];
 
     public function projects() {
-        return $this->belongsToMany(Project::class);
+        return $this->belongsToMany(Project::class)->using(UserProject::class);
     }
 
     public function traps() {
@@ -112,5 +113,22 @@ class User extends Authenticatable
         } else {
             return false;
         }
+    }
+
+    public function updateCatchFilter(array $revision) {
+        $project = Project::find($revision['project_id']);
+        $valid_species = Inspection::VALID_SPECIES;
+        $new_catch_filter = $revision['catch_filter'] ?? [];
+        $validated_catch_entices = [];
+        foreach ($new_catch_filter as $filter_item) {
+            if (in_array($filter_item, $valid_species)){
+                $validated_catch_entices[] = $filter_item;
+            }
+        }
+        if (count($validated_catch_entices) <= 0) {
+            $validated_catch_entices = null;
+        }
+        $this->projects()->updateExistingPivot($project, ['catch_filter' => $validated_catch_entices]);
+        return true;
     }
 }

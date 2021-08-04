@@ -46,9 +46,9 @@ Route::middleware('auth:sanctum')->group(function() {
            return CoordinatorSettingsResource::make($projects);
         });
         Route::post('/coordinator/settings', function(Request $request) {
-           $validated_data = $request->validate([
+           // TODO: Possibly check coordinator status here of request->user()
+            $validated_data = $request->validate([
                 'key' => 'required',
-               'label' => 'required',
                'value' => 'required',
                'project_id' => 'required|exists:projects,id'
            ]);
@@ -56,6 +56,18 @@ Route::middleware('auth:sanctum')->group(function() {
                 return response()->json(['message' => 'Coordinator settings updated!'], 200);
             } else {
                 return response()->json(['mesaage' => 'Error: Could not update coordinator settings'], 400);
+            }
+        });
+        Route::post('/coordinator/catch/filter', function(Request $request) {
+            // TODO: Possibly check coordinator status here of request->user()
+            $validated_data = $request->validate([
+                'catch_filter' => 'nullable|array',
+                'project_id' => 'required|exists:projects,id'
+            ]);
+            if($request->user()->updateCatchFilter($validated_data)) {
+                return response()->json(['message' => 'Catch filter updated!'], 200);
+            } else {
+                return response()->json(['mesaage' => 'Error: Could not update catch filter'], 400);
             }
         });
     });
