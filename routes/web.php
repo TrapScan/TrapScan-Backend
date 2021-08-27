@@ -4,6 +4,7 @@ use App\Models\Provider;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,7 +74,7 @@ Route::get('/auth/{provider}/callback', function ($provider) {
     ]);
 });
 
-Route::post('/auth/{provider}/callback', function (\Illuminate\Support\Facades\Request $request, $provider) {
+Route::post('/auth/{provider}/callback', function (Request $request, $provider) {
     $enabledProvdiers = ['apple'];
     $request->validate([
        'code' => 'required'
