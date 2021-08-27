@@ -83,7 +83,7 @@ Route::post('/auth/{provider}/callback', function (Request $request, $provider) 
         try {
             $user = Socialite::driver($provider)->stateless()->user();
         } catch (Exception $e) {
-            return response()->json(['error' => 'Invalid credentials', 'exception' => $e->getMessage()]);
+            return response()->json(['error' => 'Invalid credentials', 'exception' => $e->getMessage(), 'code' => $e->getCode()]);
         }
         $existingUser = Provider::where('provider_id', $user->getId())->first();
         if($existingUser) {
