@@ -15,4 +15,8 @@ class Provider extends Model
         'user_id',
         'avatar'
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

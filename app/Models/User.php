@@ -14,6 +14,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasRoles;
 
     const ADMIN_ROLE = 'admin';
+    const DEFAULT_SETTINGS = [
+        'theme' => 'default',
+        'dark_mode' => false,
+    ];
 
     /**
      * The attributes that are mass assignable.
