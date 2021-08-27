@@ -73,7 +73,7 @@ Route::get('/auth/{provider}/callback', function ($provider) {
     ]);
 });
 
-Route::post('/auth/{provider}/callback', function (Request $request, $provider) {
+Route::post('/auth/{provider}/callback', function (\Illuminate\Support\Facades\Request $request, $provider) {
     $enabledProvdiers = ['apple'];
     $request->validate([
        'code' => 'required'
