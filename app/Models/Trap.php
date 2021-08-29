@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Trap extends Model
 {
     use HasFactory;
+    use SpatialTrait;
 
     protected $fillable = [
         'nz_trap_id',
@@ -15,6 +17,12 @@ class Trap extends Model
         'trap_line_id',
         'project_id',
         'user_id',
+        'coordinates',
+        'name'
+    ];
+
+    protected $spatialFields = [
+        'coordinates'
     ];
 
     public function getRouteKeyName() {

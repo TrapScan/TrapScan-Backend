@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
+use App\Models\Trap;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\DomCrawler\Crawler;
@@ -72,6 +75,13 @@ class Scraper extends Controller
             $response = $client->get($link, [
                 'cookies' => $cookieJar
             ]);
+            $existing_project = Project::where('name', $project['name'])->first();
+            if(! $existing_project) {
+                $existing_project = Project::create([
+                   'name' => $project['name'],
+                    'description' => 'Fetch test'
+                ]);
+            }
             // Fetch Trap List
             $response = $client->get(self::TRAP_URL, [
                 'cookies'=> $cookieJar
@@ -84,10 +94,21 @@ class Scraper extends Controller
                     $newTrap['name'] = $trap['properties']['name'];
                     $newTrap['nid'] = $trap['properties']['nid'];
                     $traps[] = $newTrap;
+                    $trap = Trap::where('nz_trap_id', $newTrap['nid'])->first();
+                    if(! $trap) {
+                        Trap::create([
+                            'nz_trap_id' => $newTrap['nid'],
+                            'project_id' => $existing_project->id,
+                            'name' => $newTrap['name'],
+                            'coordinates' => new Point($newTrap['coordinates'][0], $newTrap['coordinates'][1])
+                        ]);
+                    }
                 }
                 $projects[$index]['traps'] = $traps;
             }
         }
+
+        // Add to DB
 
         return $projects;
     }

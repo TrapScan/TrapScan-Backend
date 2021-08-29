@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Project;
 use App\Models\Trap;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TrapFactory extends Factory
@@ -25,6 +26,8 @@ class TrapFactory extends Factory
         return [
             'nz_trap_id' => $this->faker->numberBetween(1, 100000),
             'qr_id' => getUniqueTrapId(),
+            'name' => $this->faker->name,
+            'coordinates' => new Point($this->faker->latitude, $this->faker->longitude)
         ];
     }
 
@@ -34,7 +37,9 @@ class TrapFactory extends Factory
                'nz_trap_id' => null,
                'trap_line_id' => null,
                'project_id' => null,
-               'user_id' => null
+               'user_id' => null,
+               'name' => $this->faker->name,
+               'coordinates' => new Point($this->faker->latitude, $this->faker->longitude)
            ];
         });
     }
@@ -45,7 +50,9 @@ class TrapFactory extends Factory
                 'nz_trap_id' => null,
                 'trap_line_id' => null,
                 'project_id' => $project->id,
-                'user_id' => null
+                'user_id' => null,
+                'name' => $this->faker->name,
+                'coordinates' => new Point($this->faker->latitude, $this->faker->longitude)
             ];
         });
     }
