@@ -123,12 +123,12 @@ Route::middleware('auth:sanctum')->group(function() {
 //           'lat' => 'required',
 //           'long' => 'required'
 //       ]);
-
-       $userLocation = new Point($data['lat'], $data['long']);
-//       $userLocationArea = $userLocation->
-//        return Trap::distanceSphere('coordinates', $userLocation, 3000)->get();
-       return Trap::orderByDistanceSphere('coordinates', $userLocation, 'asc')->limit(20)->get();
-    });
+//
+//       $userLocation = new Point($data['lat'], $data['long']);
+////       $userLocationArea = $userLocation->
+////        return Trap::distanceSphere('coordinates', $userLocation, 3000)->get();
+//       return Trap::orderByDistanceSphere('coordinates', $userLocation, 'asc')->limit(20)->get();
+//    });
 });
 
 /*
