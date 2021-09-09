@@ -6,7 +6,7 @@
 | :---------------- |:-------------|
 | **Project**       | {{ $project->name }} |
 | **User**          | {{ $user->name }} |
-| **Date**          | {{ $inspection->created_at->format('d-m-y H:i:s') }} |
+| **Date**          | {{ $inspection->created_at->setTimezone('Pacific/Auckland')->format('d-m-y H:i:s') }} |
 | **Caught**        | {{ $inspection->species_caught }} |
 | **Trap QR ID**    | {{ $trap->qr_id }} |
 | **Trap NZ ID**    | {{ $trap->nz_trap_id }} |

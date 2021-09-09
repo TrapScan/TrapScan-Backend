@@ -54,7 +54,7 @@ class InspectionController extends Controller
                 'strikes' => $validated_data['strikes'],
                 'species_caught' => $validated_data['species_caught'],
                 'status' => $validated_data['status'],
-                'rebaited' => $validated_data['rebaited'] === 'yes',
+                'rebaited' => $validated_data['rebaited'] === 'Yes' || $validated_data['rebaited'] === 'yes',
                 'bait_type' => $validated_data['bait_type'],
                 'trap_condition' => $validated_data['trap_condition'],
                 'notes' => $validated_data['notes'],
