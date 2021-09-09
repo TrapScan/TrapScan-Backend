@@ -27,7 +27,7 @@ class TrapFactory extends Factory
             'nz_trap_id' => $this->faker->numberBetween(1, 100000),
             'qr_id' => getUniqueTrapId(),
             'name' => $this->faker->name,
-            'coordinates' => new Point($this->faker->latitude, $this->faker->longitude)
+            'coordinates' => new Point($this->faker->longitude, $this->faker->latitude)
         ];
     }
 
@@ -39,7 +39,7 @@ class TrapFactory extends Factory
                'project_id' => null,
                'user_id' => null,
                'name' => $this->faker->name,
-               'coordinates' => new Point($this->faker->latitude, $this->faker->longitude)
+               'coordinates' => new Point($this->faker->longitude, $this->faker->latitude)
            ];
         });
     }
@@ -52,7 +52,7 @@ class TrapFactory extends Factory
                 'project_id' => $project->id,
                 'user_id' => null,
                 'name' => $this->faker->name,
-                'coordinates' => new Point($this->faker->latitude, $this->faker->longitude)
+                'coordinates' => new Point($this->faker->longitude, $this->faker->latitude)
             ];
         });
     }

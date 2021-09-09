@@ -31,7 +31,8 @@ class Inspection extends Model
         'bait_type',
         'trap_condition',
         'notes',
-        'words'
+        'words',
+        'anon',
     ];
 
     public function trap() {

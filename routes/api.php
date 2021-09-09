@@ -9,6 +9,8 @@ use App\Http\Controllers\StatsController;
 use App\Http\Resources\CoordinatorSettingsResource;
 use App\Http\Resources\UserResource;
 use App\Models\Project;
+use App\Models\Trap;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -115,11 +117,27 @@ Route::middleware('auth:sanctum')->group(function() {
      */
     Route::get('/scan/{qr_id}', [ScanController::class, 'scan'])
         ->name('scan.qr');
+
+//    Route::get('/nearby', function (Request $request) {
+//       $data = $request->validate([
+//           'lat' => 'required',
+//           'long' => 'required'
+//       ]);
+
+       $userLocation = new Point($data['lat'], $data['long']);
+//       $userLocationArea = $userLocation->
+//        return Trap::distanceSphere('coordinates', $userLocation, 3000)->get();
+       return Trap::orderByDistanceSphere('coordinates', $userLocation, 'asc')->limit(20)->get();
+    });
 });
 
 /*
  * Guest / Unprotected Routes
  */
+http://localhost/api/inspection/anon/create
+Route::post('/inspection/anon/create', [InspectionController::class, 'createAnon'])
+    ->name('inspections.create.anon');
+
 Route::prefix('anon')->group(function () {
     Route::get('/scan/{qr_id}', [ScanController::class, 'anonScan'])
         ->name('scan.qr');

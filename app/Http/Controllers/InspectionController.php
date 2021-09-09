@@ -7,9 +7,48 @@ use App\Models\Inspection;
 use App\Models\Trap;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class InspectionController extends Controller
 {
+    public function createAnon(Request $request) {
+        $validated_data = $request->validate([
+            'QR_ID' => 'required',
+            'species_caught' => 'required'
+        ]);
+
+        $trap = Trap::where('qr_id', $validated_data['QR_ID'])->first();
+        if(! $trap) {
+            return response()->json([
+                'error' => 'Error: Trap ' . $validated_data['QR_ID'] . ' does not exist'
+            ], 422);
+        }
+
+        $oneHourAgo = Carbon::now()->subMinutes(10);
+        if(env('APP_ENV') === 'local') $oneHourAgo = Carbon::now()->subSeconds(20);
+        if(Inspection::where('trap_id', $trap->id)->where('species_caught', $validated_data['species_caught'])
+            ->where('created_at', '>=', $oneHourAgo)->exists()) {
+            // Silently fail to the user to prevent spam of the same trap
+            Log::info('Skipping store of anan inspection. Possible spam', $validated_data);
+        } else {
+            $inspection = Inspection::create([
+                'date' => Carbon::now(),
+                'trap_id' => $trap->id,
+                'recorded_by' => null,
+                'strikes' => 0,
+                'species_caught' => $validated_data['species_caught'],
+                'status' => 'Sprung',
+                'rebaited' => false,
+                'bait_type' => 'None',
+                'trap_condition' => 'Unknown',
+                'notes' => 'Anonymous inspection. Only contains species data',
+                'words' => 'Anonymous inspection',
+                'anon' => true
+            ]);
+        }
+
+        return response()->json(['message' => 'Inspection  added'], 200);
+    }
     public function create(Request $request)
     {
         $validated_data = $request->validate([
