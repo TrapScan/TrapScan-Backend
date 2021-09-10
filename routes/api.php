@@ -125,11 +125,12 @@ Route::middleware('auth:sanctum')->group(function() {
        ]);
 
        $userLocation = new Point($data['long'], $data['lat']);
-//       $userLocationArea = $userLocation->
-//        return Trap::distanceSphere('coordinates', $userLocation, 3000)->get();
        $project_ids = $request->user()->projects->pluck('id')->toArray();
-       return Trap::whereIn('project_id', $project_ids)
-           ->orderByDistance('coordinates', $userLocation, 'asc')
+//       return Trap::whereIn('project_id', $project_ids)
+//           ->orderByDistance('coordinates', $userLocation, 'asc')
+//           ->limit(5)
+//           ->get();
+        return Trap::orderByDistance('coordinates', $userLocation, 'asc')
            ->limit(5)
            ->get();
     });
