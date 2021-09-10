@@ -118,17 +118,21 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/scan/{qr_id}', [ScanController::class, 'scan'])
         ->name('scan.qr');
 
-//    Route::get('/nearby', function (Request $request) {
-//       $data = $request->validate([
-//           'lat' => 'required',
-//           'long' => 'required'
-//       ]);
-//
-//       $userLocation = new Point($data['lat'], $data['long']);
-////       $userLocationArea = $userLocation->
-////        return Trap::distanceSphere('coordinates', $userLocation, 3000)->get();
-//       return Trap::orderByDistanceSphere('coordinates', $userLocation, 'asc')->limit(20)->get();
-//    });
+    Route::get('/nearby', function (Request $request) {
+       $data = $request->validate([
+           'lat' => 'required',
+           'long' => 'required'
+       ]);
+
+       $userLocation = new Point($data['long'], $data['lat']);
+//       $userLocationArea = $userLocation->
+//        return Trap::distanceSphere('coordinates', $userLocation, 3000)->get();
+       $project_ids = $request->user()->projects->pluck('id')->toArray();
+       return Trap::whereIn('project_id', $project_ids)
+           ->orderByDistance('coordinates', $userLocation, 'asc')
+           ->limit(5)
+           ->get();
+    });
 });
 
 /*
