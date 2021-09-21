@@ -42,7 +42,7 @@ Route::get('/auth/{provider}/callback', function ($provider) {
         } catch (Exception $e) {
             return response()->json(['error' => 'Invalid credentials']);
         }
-        $existingUser = Provider::where('provider_id', $user->getId())->first();
+        $existingUser = Provider::where('user_id', $user->getId())->first();
         if($existingUser) {
             $existingUser = $existingUser->user()->first();
         }
@@ -85,7 +85,7 @@ Route::post('/auth/{provider}/callback', function (Request $request, $provider) 
         } catch (Exception $e) {
             return response()->json(['error' => 'Invalid credentials', 'exception' => $e->getMessage(), 'code' => $e->getCode()]);
         }
-        $existingUser = Provider::where('provider_id', $user->getId())->first();
+        $existingUser = Provider::where('user_id', $user->getId())->first();
         if($existingUser) {
             $existingUser = $existingUser->user()->first();
         }
