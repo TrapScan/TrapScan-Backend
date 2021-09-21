@@ -84,7 +84,13 @@ class User extends Authenticatable
     }
 
     public function isCoordinator() {
-        return $this->projects()->wherePivot('coordinator', '=', true)->withPivot(Project::USER_PROJECT_COORDINATOR_SETTINGS)->get();
+        return $this->projects()
+            ->wherePivot('coordinator', '=', true)
+            ->withPivot(Project::USER_PROJECT_COORDINATOR_SETTINGS)
+            ->with(['traps' => function ($q) {
+                return $q->whereNull('qr_id');
+            }])
+            ->get();
     }
 
     public function isCoordinatorOf(Project $project) {

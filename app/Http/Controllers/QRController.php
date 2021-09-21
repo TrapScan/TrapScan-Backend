@@ -63,7 +63,6 @@ class QRController extends Controller
      * This endpoint will be called only by admin users from the admin tool
      * This will facilitate bulk assignment if needed
      *
-     * TODO: This method can be removed if that tool will be doing nothing extra (than mapQRCode())
      */
     public function mapQRCodeAdmin(Request $request) {
         $validated_data = $request->validate([
@@ -73,19 +72,31 @@ class QRController extends Controller
 
         $qr = QR::where('qr_code', $validated_data['qr_id'])->first();
         $trap = Trap::where('nz_trap_id', $validated_data['nz_id'])->first();
-        $trap->qr_id = $qr->qr_code;
-        $qr->trap_id = $trap->id;
-        $trap->save();
-        $qr->save();
 
-        return response()->json([
-            'trap' => $trap,
-            'message' => 'Trap has been mapped successfully'
-        ]);
+        // Check if Pcord or Admin
+        $user = $request->user();
+        $project = $trap->project;
+        if($user->hasRole('admin') || $user->isCoordinatorOf($project)) {
+            $trap->qr_id = $qr->qr_code;
+            $qr->trap_id = $trap->id;
+            $trap->save();
+            $qr->save();
+
+            return response()->json([
+                'trap' => $trap,
+                'message' => 'Trap has been mapped successfully'
+            ]);
+        } else {
+            return response()->json([
+                'message' => "You don't have permission to do that"
+            ], 403);
+        }
     }
 
     /*
      * This function will be called by general users from the scanning application
+     *      * TODO: This method can be removed if that tool will be doing nothing extra (than mapQRCode())
+
      */
     public function mapQRCode(Request $request) {
         $validated_data = $request->validate([

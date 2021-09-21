@@ -76,10 +76,10 @@ Route::middleware('auth:sanctum')->group(function() {
         });
     });
 
-    Route::get('/user/isCoordinator/{project}',  function (Request $request, Project $project) {
-        $coord = $request->user()->isCoordinatorOf($project);
-        if($coord) {
-            return response()->json([true], 200);
+    Route::get('/user/isCoordinator',  function (Request $request, Project $project) {
+        $coord = $request->user()->isCoordinator();
+        if(count($coord) > 0) {
+            return response()->json(['project' => $coord], 200);
         } else {
             return response()->json([false], 400);
         }
@@ -100,8 +100,8 @@ Route::middleware('auth:sanctum')->group(function() {
             ->name('admin.qr.create');
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
             ->name('admin.qr.create.project');
-        Route::get('/qr/print/{trap:qr_id}', function (Trap $trap) {
-            return QrCode::size(500)->generate(env('SPA_URL') . '/scan/' . $trap->qr_id);
+        Route::get('/qr/print/{qr:qr_code}', function (QR $qr) {
+            return QrCode::size(500)->generate(env('SPA_URL') . '/scan/' . $qr->qr_code);
         });
         Route::get('/qr/all', function (QR $qr) {
             return Trap::whereNotNull('qr_id')->with('project')->get();
@@ -112,14 +112,12 @@ Route::middleware('auth:sanctum')->group(function() {
             ->name('admin.qr.unmapped.project');
         Route::get('/nocode', [QRController::class, 'noCode'])
             ->name('admin.qr.unmapped.nocode');
-        Route::post('/qr/map', [QRController::class, 'mapQRCodeAdmin'])
-            ->name('admin.qr.map');
     });
 
     /*
      * User Accessible QR routes
      */
-    Route::post('/qr/map', [QRController::class, 'mapQRCode'])
+    Route::post('/admin/qr/map', [QRController::class, 'mapQRCodeAdmin'])
         ->name('qr.map');
 
     /*
