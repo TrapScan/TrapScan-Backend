@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Inspection;
 use App\Models\Project;
+use App\Models\QR;
 use App\Models\Trap;
 use App\Models\TrapLine;
 use App\Models\User;
@@ -29,7 +30,7 @@ class DatabaseSeeder extends Seeder
         $settings = ['settings' => ['theme' => 'default', 'dark_mode' => true]];
         $users = User::factory($userCount)->create($settings);
         $projects = Project::factory($projectCount)->has(
-            Trap::factory()->count($trapCount)
+            Trap::factory($trapCount)
         )->create()->toArray();
 
         foreach ($users as $user) {
@@ -50,6 +51,14 @@ class DatabaseSeeder extends Seeder
                     ]);
                 }
             }
+        }
+
+        // Create the inverse of the trap relationship to QRs
+        $traps = Trap::all();
+        foreach($traps as $trap) {
+            $qr = QR::where('qr_code', $trap->qr_id)->first();
+            $qr->trap_id = $trap->id;
+            $qr->save();
         }
 
         // Add the first user in each project as the coordinator
@@ -81,10 +90,16 @@ class DatabaseSeeder extends Seeder
          */
         // Create a sample trap for testing
         if(! Trap::where('qr_id', 'Test-1234')->exists() && Project::find(1)->exists()){
-            Trap::factory()->create([
+            if(! QR::where('qr_code', 'Test-1234')->exists()) {
+                QR::create(['qr_code' => 'Test-1234']);
+            }
+            $test_trap = Trap::factory()->create([
                 'qr_id' => 'Test-1234',
                 'project_id' => Project::find(1)->get()->first()->id
             ]);
+            $qr = QR::where('qr_code', 'Test-1234')->first();
+            $qr->trap_id = $test_trap->id;
+            $qr->save();
         }
 
         // Create an admin user for Dylan

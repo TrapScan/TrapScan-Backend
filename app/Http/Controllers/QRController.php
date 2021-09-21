@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\QR;
 use App\Models\Trap;
 use Illuminate\Http\Request;
 
@@ -16,15 +17,8 @@ class QRController extends Controller
 
         $ids = [];
         for ($i = 0; $i < $validated_data['number']; $i++) {
-            $qr_id = getUniqueTrapId();
-            Trap::create([
-                'nz_trap_id' => null,
-                'trap_line_id' => null,
-                'qr_id' => $qr_id,
-                'project_id' => null,
-                'user_id' => null
-            ]);
-            $ids[] = $qr_id;
+            $qr_code = getUniqueTrapId();
+            QR::create(['qr_code' => $qr_code]);
         }
 
         return ['new_qr_codes' => $ids];
@@ -53,11 +47,16 @@ class QRController extends Controller
     }
 
     public function unmapped(Request $request) {
-        return Trap::unmapped()->get();
+        return QR::whereNull('trap_id')->get();
     }
 
     public function unmappedInProject(Project $project) {
         return Trap::where('project_id', $project->id)->unmappedInProject()->get();
+    }
+
+    public function noCode(Request $request) {
+        return Trap::select('id', 'project_id', 'nz_trap_id', 'name', 'coordinates', 'qr_id')
+                ->noCode()->with('project')->get();
     }
 
     /*
@@ -68,12 +67,16 @@ class QRController extends Controller
      */
     public function mapQRCodeAdmin(Request $request) {
         $validated_data = $request->validate([
-            'qr_id' => 'required|exists:traps,qr_id',
-            'nz_id' => 'required'
+            'qr_id' => 'required|exists:qr,qr_code',
+            'nz_id' => 'required|exists:traps,nz_trap_id'
         ]);
-        $trap = Trap::where('qr_id', $validated_data['qr_id'])->first();
-        $trap->nz_trap_id = $validated_data['nz_id'];
+
+        $qr = QR::where('qr_code', $validated_data['qr_id'])->first();
+        $trap = Trap::where('nz_trap_id', $validated_data['nz_id'])->first();
+        $trap->qr_id = $qr->qr_code;
+        $qr->trap_id = $trap->id;
         $trap->save();
+        $qr->save();
 
         return response()->json([
             'trap' => $trap,

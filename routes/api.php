@@ -9,10 +9,12 @@ use App\Http\Controllers\StatsController;
 use App\Http\Resources\CoordinatorSettingsResource;
 use App\Http\Resources\UserResource;
 use App\Models\Project;
+use App\Models\QR;
 use App\Models\Trap;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,10 +100,18 @@ Route::middleware('auth:sanctum')->group(function() {
             ->name('admin.qr.create');
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
             ->name('admin.qr.create.project');
+        Route::get('/qr/print/{trap:qr_id}', function (Trap $trap) {
+            return QrCode::size(500)->generate('https://' . env('SPA_URL') . '/scan/' . $trap->qr_id);
+        });
+        Route::get('/qr/all', function (QR $qr) {
+            return Trap::whereNotNull('qr_id')->with('project')->get();
+        });
         Route::get('/qr/unmapped', [QRController::class, 'unmapped'])
             ->name('admin.qr.unmapped');
         Route::get('/qr/unmapped/{project}', [QRController::class, 'unmappedInProject'])
             ->name('admin.qr.unmapped.project');
+        Route::get('/nocode', [QRController::class, 'noCode'])
+            ->name('admin.qr.unmapped.nocode');
         Route::post('/qr/map', [QRController::class, 'mapQRCodeAdmin'])
             ->name('admin.qr.map');
     });

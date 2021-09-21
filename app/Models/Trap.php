@@ -29,6 +29,10 @@ class Trap extends Model
         return 'qr_id';
     }
 
+    public function qrCode() {
+        return $this->belongsTo(QR::class);
+    }
+
     public function trapline() {
         return $this->belongsTo(TrapLine::class);
     }
@@ -43,6 +47,10 @@ class Trap extends Model
 
     public function inspections() {
         return $this->hasMany(Inspection::class);
+    }
+
+    public function scopeNoCode($query) {
+        return $query->whereNotNull('nz_trap_id')->whereNotNull('project_id')->whereNull('qr_id');
     }
 
     public function scopeUnmapped($query) {

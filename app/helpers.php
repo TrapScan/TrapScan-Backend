@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\QR;
+use App\Models\Trap;
 use Illuminate\Support\Facades\Auth;
 
 if (!function_exists('getUniqueTrapId')) {
@@ -105,7 +107,7 @@ if (!function_exists('getUniqueTrapId')) {
             $id = str_pad(rand(0, pow(10, 4)-1), 4, '0', STR_PAD_LEFT);
             $word = $mouri_words[array_rand($mouri_words, 1)];
             $candidate = $word . '-' . $id;
-            if(! \App\Models\Trap::where('qr_id', $candidate)->exists()) {
+            if(! QR::where('qr_code', $candidate)->exists()) {
                 return $candidate;
             }
         }

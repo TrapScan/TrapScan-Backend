@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Project;
+use App\Models\QR;
 use App\Models\Trap;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,9 +24,11 @@ class TrapFactory extends Factory
      */
     public function definition()
     {
+        $qr_code = getUniqueTrapId();
+        QR::create(['qr_code' => $qr_code]);
         return [
             'nz_trap_id' => $this->faker->numberBetween(1, 100000),
-            'qr_id' => getUniqueTrapId(),
+            'qr_id' => $qr_code,
             'name' => $this->faker->name,
             'coordinates' => new Point($this->faker->longitude, $this->faker->latitude)
         ];
