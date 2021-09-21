@@ -101,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
             ->name('admin.qr.create.project');
         Route::get('/qr/print/{trap:qr_id}', function (Trap $trap) {
-            return QrCode::size(500)->generate('https://' . env('SPA_URL') . '/scan/' . $trap->qr_id);
+            return QrCode::size(500)->generate(env('SPA_URL') . '/scan/' . $trap->qr_id);
         });
         Route::get('/qr/all', function (QR $qr) {
             return Trap::whereNotNull('qr_id')->with('project')->get();
