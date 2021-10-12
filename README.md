@@ -84,6 +84,19 @@ https://laravel.com/docs/8.x/sail
 http://localhost will be the main app
 http://localhost:8090 has a phpmyadmin instance (credentials can be found in your .env)
 
+##### Loading Production Data
+You can load data from any TrapNZ projects you have access to by suppliing your username and password in your .env
+`GET http://localhost/scrape`
+```
+TRAP_NZ_USERNAME=your-user-name
+TRAP_NZ_PASSWORD=your-password
+```
+This will pull all traps and projects you have access to. *It will not grab notes or trapline data*
+
+To get this additional data you'll need to download the csv trap reports from TrapScan and post the file to the upload route.
+Field name "file" is expected. There's a very loose Postman collection available through Dylan or Kurtis.
+`POST http://localhost/scrape/upload`
+Headings expected: `"Project","ID","Trap line","Trap type","Trap sub type","Date installed","Retired","Sensor ID","Sensor provider","Status","Total kills","Lat","Lon","Notes"`
 
 ## Learning Laravel
 

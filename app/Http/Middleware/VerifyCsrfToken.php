@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        'https://api.trapscan.app/auth/apple/callback'
+        'https://api.trapscan.app/auth/apple/callback',
+        '/scrape/upload'
     ];
 }

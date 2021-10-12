@@ -18,7 +18,8 @@ class Trap extends Model
         'project_id',
         'user_id',
         'coordinates',
-        'name'
+        'name',
+        'notes'
     ];
 
     protected $spatialFields = [
@@ -34,7 +35,7 @@ class Trap extends Model
     }
 
     public function trapline() {
-        return $this->belongsTo(TrapLine::class);
+        return $this->belongsTo(TrapLine::class, 'trap_line_id', 'id');
     }
 
     public function project() {
