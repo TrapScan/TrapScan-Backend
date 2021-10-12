@@ -53,8 +53,12 @@ class Trap extends Model
         return $query->whereNotNull('nz_trap_id')->whereNotNull('project_id')->whereNull('qr_id');
     }
 
+    public function scopeMapped($query) {
+        return $query->whereNotNull('nz_trap_id')->whereNotNull('project_id')->whereNotNull('qr_id');
+    }
+
     public function scopeUnmapped($query) {
-        return $query->whereNull('nz_trap_id')->whereNull('trap_line_id')->whereNull('project_id')->whereNull('user_id');
+        return $query->whereNull('nz_trap_id')->whereNull('trap_line_id')->whereNull('user_id');
     }
 
     public function scopeUnmappedInProject($query) {

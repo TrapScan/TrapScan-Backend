@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Project;
 use App\Models\QR;
 use App\Models\Trap;
+use App\Models\User;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +86,15 @@ Route::middleware('auth:sanctum')->group(function() {
         }
     })->name('user.is.coordinator');
 
+    Route::get('/user/isCoordinatorByTrap/{trap}',  function (Request $request, Trap $trap) {
+        $project = $trap->project;
+        if($request->user()->isCoordinatorOf($project)) {
+            return response()->json([true], 200);
+        } else {
+            return response()->json([false], 400);
+        }
+    })->name('user.is.coordinator');
+
     Route::prefix('inspection')->group(function () {
         Route::post('/create', [InspectionController::class, 'create'])
             ->name('inspection.create');
@@ -133,12 +143,23 @@ Route::middleware('auth:sanctum')->group(function() {
        ]);
 
        $userLocation = new Point($data['long'], $data['lat']);
-       $project_ids = $request->user()->projects->pluck('id')->toArray();
+       // Will find only a users projects traps
+//       $project_ids = $request->user()->projects->pluck('id')->toArray();
 //       return Trap::whereIn('project_id', $project_ids)
 //           ->orderByDistance('coordinates', $userLocation, 'asc')
 //           ->limit(5)
 //           ->get();
-        return Trap::orderByDistance('coordinates', $userLocation, 'asc')
+        $coordinatorProjects = $request->user()->isCoordinator()->pluck('id')->toArray();
+
+        return Trap::where('id', '>', '1201')
+//            ->whereIn('project_id', $coordinatorProjects)->noCode()
+            ->where(function($q) {
+                $q->mapped();
+            })
+            ->orWhere(function($q) use($coordinatorProjects) {
+                $q->whereIn('project_id', $coordinatorProjects)->noCode();
+            })
+            ->orderByDistance('coordinates', $userLocation, 'asc')
            ->limit(5)
            ->get();
     });
