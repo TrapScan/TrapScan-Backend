@@ -18,6 +18,9 @@ https://aka.ms/wslkernel
 
 Restart Docker Desktop once the linux kernel is installed
 
+##### Link Docker and WSL2
+https://docs.docker.com/desktop/windows/wsl/
+
 ##### 2. Clone Repo
 - SSH: ```git clone git@github.com:KurtisPapple/TrapScan-Backend.git```
 - HTTP:``git clone https://github.com/KurtisPapple/TrapScan-Backend.git``
@@ -26,6 +29,10 @@ If you're struggling with this you can try use the GitHub Desktop program
 https://desktop.github.com/
 
 Or clone the repo through VSCode
+
+##### Note: Modify .env file
+- Copy the .env.example file to .env
+- Update values for your local instance
 
 ##### 3. Install PHP & Composer (Windows)
 - https://www.sitepoint.com/how-to-install-php-on-windows/
@@ -47,10 +54,8 @@ Or clone the repo through VSCode
 - Reclone the repo inside WSL
 - ``sudo apt install php``
 - ``sudo apt install unzip``
-- Install PHP extensions ``sudo apt install php7.4-common php7.4-bcmath openssl php7.4-json php7.4-mbstring``
-- ``sudo apt install php7.4-opcache php7.4-pdo php7.4-bcmath php7.4-calendar php7.4-ctype php7.4-exif php7.4-ffi php7.4-fileinfo php7.4-ftp php7.4-gettext php7.4-iconv php7.4-js
-    on php7.4-mbstring php7.4-phar php7.4-posix php7.4-readline php7.4-shmop php7.4-sockets php7.4-sysvmsg php7.4-sy
-    svsem php7.4-sysvshm php7.4-tokenizer php7.4-gd php7.4-xml``
+- Install PHP extensions. This depends on the version of PHP you installed. The following packages are needed for PHP8
+- ``sudo apt install php8.0-gd php8.0-dom php8.0mbstring``
 - Verify the install with ``php --version``
 - Install composer with Command-line installation ( https://getcomposer.org/ ) 
 - Verify the install with ``composer --verion``
@@ -60,6 +65,7 @@ Or clone the repo through VSCode
 https://laravel.com/docs/8.x/sail
 - Open the project in VSCode
 - Install any recommenced plugins
+- mbstring, json, 
 - Open a terminal ( https://www.microsoft.com/store/productId/9N0DX20HK701 )
 - ``cd trapscan-backend`` Or whatever directory you chose
 - ``php artisan sail:install``
