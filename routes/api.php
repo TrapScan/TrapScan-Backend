@@ -31,45 +31,45 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 /*
  * Login Protected Routes
  */
-Route::middleware('auth:sanctum')->group(function() {
-    Route::get('/user',  function (Request $request) {
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
         return UserResource::make($request->user()->load('roles'));
     })->name('user.info');
 
-    Route::prefix('my')->group(function() {
-        Route::get('/inspectionsPerProject', function(Request $request) {
+    Route::prefix('my')->group(function () {
+        Route::get('/inspectionsPerProject', function (Request $request) {
             return $request->user()->inspectionCountPerProject();
         });
-        Route::post('/settings', function(Request $request) {
-           $validated_data = $request->validate([
-               'settings' => 'required|array'
-           ]);
-           return UserResource::make($request->user()->setSetting($validated_data['settings']));
+        Route::post('/settings', function (Request $request) {
+            $validated_data = $request->validate([
+                'settings' => 'required|array'
+            ]);
+            return UserResource::make($request->user()->setSetting($validated_data['settings']));
         });
-        Route::get('/coordinator/settings', function(Request $request) {
-           $projects = $request->user()->isCoordinator();
-           return CoordinatorSettingsResource::make($projects);
+        Route::get('/coordinator/settings', function (Request $request) {
+            $projects = $request->user()->isCoordinator();
+            return CoordinatorSettingsResource::make($projects);
         });
-        Route::post('/coordinator/settings', function(Request $request) {
-           // TODO: Possibly check coordinator status here of request->user()
+        Route::post('/coordinator/settings', function (Request $request) {
+            // TODO: Possibly check coordinator status here of request->user()
             $validated_data = $request->validate([
                 'key' => 'required',
-               'value' => 'required',
-               'project_id' => 'required|exists:projects,id'
-           ]);
-            if($request->user()->setCoordinatorSettings($validated_data)) {
+                'value' => 'required',
+                'project_id' => 'required|exists:projects,id'
+            ]);
+            if ($request->user()->setCoordinatorSettings($validated_data)) {
                 return response()->json(['message' => 'Coordinator settings updated!'], 200);
             } else {
                 return response()->json(['mesaage' => 'Error: Could not update coordinator settings'], 400);
             }
         });
-        Route::post('/coordinator/catch/filter', function(Request $request) {
+        Route::post('/coordinator/catch/filter', function (Request $request) {
             // TODO: Possibly check coordinator status here of request->user()
             $validated_data = $request->validate([
                 'catch_filter' => 'nullable|array',
                 'project_id' => 'required|exists:projects,id'
             ]);
-            if($request->user()->updateCatchFilter($validated_data)) {
+            if ($request->user()->updateCatchFilter($validated_data)) {
                 return response()->json(['message' => 'Catch filter updated!'], 200);
             } else {
                 return response()->json(['mesaage' => 'Error: Could not update catch filter'], 400);
@@ -77,18 +77,18 @@ Route::middleware('auth:sanctum')->group(function() {
         });
     });
 
-    Route::get('/user/isCoordinator',  function (Request $request, Project $project) {
+    Route::get('/user/isCoordinator', function (Request $request, Project $project) {
         $coord = $request->user()->isCoordinator();
-        if(count($coord) > 0) {
+        if (count($coord) > 0) {
             return response()->json(['project' => $coord], 200);
         } else {
             return response()->json([false], 400);
         }
     })->name('user.is.coordinator');
 
-    Route::get('/user/isCoordinatorByTrap/{trap}',  function (Request $request, Trap $trap) {
+    Route::get('/user/isCoordinatorByTrap/{trap}', function (Request $request, Trap $trap) {
         $project = $trap->project;
-        if($request->user()->isCoordinatorOf($project)) {
+        if ($request->user()->isCoordinatorOf($project)) {
             return response()->json([true], 200);
         } else {
             return response()->json([false], 400);
@@ -105,7 +105,7 @@ Route::middleware('auth:sanctum')->group(function() {
     /*
      * Admin Protected Routes
      */
-    Route::prefix('admin')->middleware('role:admin')->group(function() {
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::post('/qr/create', [QRController::class, 'create'])
             ->name('admin.qr.create');
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
@@ -137,31 +137,26 @@ Route::middleware('auth:sanctum')->group(function() {
         ->name('scan.qr');
 
     Route::get('/nearby', function (Request $request) {
-       $data = $request->validate([
-           'lat' => 'required',
-           'long' => 'required'
-       ]);
+        $data = $request->validate([
+            'lat' => 'required',
+            'long' => 'required'
+        ]);
 
-       $userLocation = new Point($data['long'], $data['lat']);
-       // Will find only a users projects traps
-//       $project_ids = $request->user()->projects->pluck('id')->toArray();
-//       return Trap::whereIn('project_id', $project_ids)
-//           ->orderByDistance('coordinates', $userLocation, 'asc')
-//           ->limit(5)
-//           ->get();
+        $userLocation = new Point($data['long'], $data['lat']);
         $coordinatorProjects = $request->user()->isCoordinator()->pluck('id')->toArray();
 
         return Trap::where('id', '>', '1201')
-//            ->whereIn('project_id', $coordinatorProjects)->noCode()
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->mapped();
+                $q->where('trap_line_id', '!=', null);
             })
-            ->orWhere(function($q) use($coordinatorProjects) {
+            ->orWhere(function ($q) use ($coordinatorProjects) {
                 $q->whereIn('project_id', $coordinatorProjects)->noCode();
+                $q->where('trap_line_id', '!=', null);
             })
             ->orderByDistance('coordinates', $userLocation, 'asc')
-           ->limit(5)
-           ->get();
+            ->limit(5)
+            ->get();
     });
 });
 
@@ -182,14 +177,14 @@ Route::prefix('stats')->group(function () {
         ->name('stats.kpi');
 });
 
-Route::get('/mail', function(Request $request) {
-   $inspection = \App\Models\Inspection::find(20);
-   $trap = $inspection->trap;
-   $project = $trap->project;
-   $user = $inspection->user;
+Route::get('/mail', function (Request $request) {
+    $inspection = \App\Models\Inspection::find(20);
+    $trap = $inspection->trap;
+    $project = $trap->project;
+    $user = $inspection->user;
 
-   Mail::to('dylan@dylanhobbs.ie')
-       ->send(new \App\Mail\TrapCatch($inspection, $project, $user, $trap));
+    Mail::to('dylan@dylanhobbs.ie')
+        ->send(new \App\Mail\TrapCatch($inspection, $project, $user, $trap));
 });
 
 
