@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\TrapImport;
 use App\Models\Project;
 use App\Models\Trap;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use GuzzleHttp\Client;
+use Maatwebsite\Excel\Facades\Excel;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -15,6 +17,10 @@ class Scraper extends Controller
     const LOGIN_URL = self::BASE_URL . "/user/login?destination=my-projects";
     const TRAP_URL = self::BASE_URL . "/project/trap_overview.json";
 
+    public function uploadTraps() {
+         Excel::import(new TrapImport, request()->file('file'), null, \Maatwebsite\Excel\Excel::CSV);
+        return true;
+    }
 
     public function projects() {
         $loginNeeded = false;
