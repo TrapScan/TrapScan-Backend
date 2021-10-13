@@ -148,11 +148,11 @@ Route::middleware('auth:sanctum')->group(function () {
         return Trap::where('id', '>', '1201')
             ->where(function ($q) {
                 $q->mapped();
-                $q->where('trap_line_id', '!=', null);
+                $q->where('private', false);
+//                $q->where('trap_line_id', '!=', null); // Only show traps that are traplines
             })
             ->orWhere(function ($q) use ($coordinatorProjects) {
                 $q->whereIn('project_id', $coordinatorProjects)->noCode();
-                $q->where('trap_line_id', '!=', null);
             })
             ->orderByDistance('coordinates', $userLocation, 'asc')
             ->limit(5)
