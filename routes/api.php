@@ -107,6 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * Admin Protected Routes
      */
     Route::prefix('admin')->middleware('role:admin')->group(function () {
+
         Route::post('/qr/create', [QRController::class, 'create'])
             ->name('admin.qr.create');
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
@@ -116,10 +117,8 @@ Route::middleware('auth:sanctum')->group(function () {
                 'Content-type' => 'image/png',
                 'Content-Disposition' => 'attachment; filename="image.png"',
             ];
-//            return Response::make(QrCode::size(500)->format('png')->generate(env('SPA_URL') . '/scan/' . $qr->qr_code), 200, $headers);
-            $qr_code_temp = QrCode::size(420)->format('png')->generate(env('SPA_URL') . '/scan/' . $qr->qr_code, '../public/qrcodes/' . $qr->qr_code . '.png');
+             QrCode::size(420)->format('png')->generate(env('SPA_URL') . '/scan/' . $qr->qr_code, '../public/qrcodes/' . $qr->qr_code . '.png');
             $qr_code = Image::make(public_path() . '/qrcodes/' . $qr->qr_code . '.png');
-//            return $qr->response('png');
             $template = Image::make(public_path() . '/qr_template.png')
                 ->insert($qr_code, 'top-left', 110, 210)
                 ->text(strtoupper($qr->qr_code), 100, 155, function($font) {
@@ -132,7 +131,6 @@ Route::middleware('auth:sanctum')->group(function () {
                     $font->size(22);
                 });
             return $template->response('png');
-//            return Response::make($template, 200, $headers);
         });
         Route::get('/qr/all', function (QR $qr) {
             return Trap::whereNotNull('qr_id')->with('project')->get();
@@ -208,4 +206,27 @@ Route::get('/mail', function (Request $request) {
         ->send(new \App\Mail\TrapCatch($inspection, $project, $user, $trap));
 });
 
+Route::get('/qr/print/manual/{qr:qr_code}', function(QR $qr, Request $request, Response $response) {
+    $headers = [
+        'Content-type' => 'image/png',
+        'Content-Disposition' => 'attachment; filename="image.png"',
+    ];
+    QrCode::size(420)->format('png')->generate(env('SPA_URL') . '/scan/' . $qr->qr_code, '../public/qrcodes/' . $qr->qr_code . '.png');
+    $qr_code = Image::make(public_path() . '/qrcodes/' . $qr->qr_code . '.png');
+    $template = Image::make(public_path() . '/qr_template.png')
+        ->insert($qr_code, 'top-left', 110, 210)
+        ->text(strtoupper($qr->qr_code), 100, 155, function($font) {
+            $font->file(public_path() . '/aftika.ttf');
+            $font->size(32);
+        })
+        ->text(\Carbon\Carbon::now()->format('dmy'), 520, 993, function($font) {
+            $font->file(public_path() . '/aftika.ttf');
+            $font->color('#87A0B1');
+            $font->size(22);
+        });
+    $response = Response::make($template->encode('png'));
+    $response->header('Content-Type', 'image/png');
+    $response->header('Content-Disposition', 'attachment; filename="image.png"');
+    return $response;
+});
 
