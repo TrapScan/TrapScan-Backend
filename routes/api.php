@@ -15,6 +15,7 @@ use App\Models\User;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /*
@@ -110,8 +111,28 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('admin.qr.create');
         Route::post('/qr/create/{project}', [QRController::class, 'createInProject'])
             ->name('admin.qr.create.project');
-        Route::get('/qr/print/{qr:qr_code}', function (QR $qr) {
-            return QrCode::size(500)->generate(env('SPA_URL') . '/scan/' . $qr->qr_code);
+        Route::get('/qr/print/{qr:qr_code}', function (QR $qr, Request $request, Response $response) {
+            $headers = [
+                'Content-type' => 'image/png',
+                'Content-Disposition' => 'attachment; filename="image.png"',
+            ];
+//            return Response::make(QrCode::size(500)->format('png')->generate(env('SPA_URL') . '/scan/' . $qr->qr_code), 200, $headers);
+            $qr_code_temp = QrCode::size(420)->format('png')->generate(env('SPA_URL') . '/scan/' . $qr->qr_code, '../public/qrcodes/' . $qr->qr_code . '.png');
+            $qr_code = Image::make(public_path() . '/qrcodes/' . $qr->qr_code . '.png');
+//            return $qr->response('png');
+            $template = Image::make(public_path() . '/qr_template.png')
+                ->insert($qr_code, 'top-left', 110, 210)
+                ->text(strtoupper($qr->qr_code), 100, 155, function($font) {
+                    $font->file(public_path() . '/aftika.ttf');
+                    $font->size(32);
+                })
+                ->text(\Carbon\Carbon::now()->format('dmy'), 520, 993, function($font) {
+                    $font->file(public_path() . '/aftika.ttf');
+                    $font->color('#87A0B1');
+                    $font->size(22);
+                });
+            return $template->response('png');
+//            return Response::make($template, 200, $headers);
         });
         Route::get('/qr/all', function (QR $qr) {
             return Trap::whereNotNull('qr_id')->with('project')->get();
