@@ -8,6 +8,7 @@ use App\Http\Controllers\ScanController;
 use App\Http\Controllers\StatsController;
 use App\Http\Resources\CoordinatorSettingsResource;
 use App\Http\Resources\UserResource;
+use App\Models\Feedback;
 use App\Models\Project;
 use App\Models\QR;
 use App\Models\Trap;
@@ -15,6 +16,7 @@ use App\Models\User;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -36,6 +38,36 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return UserResource::make($request->user()->load('roles'));
     })->name('user.info');
+
+    Route::post('/feedback', function (Request $request) {
+        $valid_keys = ['issue_related_to', 'body', 'qr_id', 'nz_name', 'body',
+            'feedback_or_suggestions', 'question_or_comments', 'rating'];
+        $valid_types = ['bugs_or_issues', 'qr_code_or_trap_issues', 'feedback_suggestions_or_contact'];
+        $validated_data = $request->validate([
+           'fields' => 'required|array',
+           'type' => [
+               'required',
+               Rule::in($valid_types)
+           ]
+       ]);
+        foreach ($validated_data['fields'] as $key => $value) {
+            if(!in_array($key, $valid_keys)) {
+                return response()->json([
+                    "Error: you're not allowed to do that",
+                    $key
+                ], 400);
+            }
+        }
+
+        $user = $request->user();
+
+        return Feedback::create([
+            'type' => $validated_data['type'],
+            'data' => json_encode($validated_data['fields']),
+            'recorded_by' => $user->id ?? null,
+            'name' => $user->name ?? 'Anonymous'
+        ]);
+    });
 
     Route::prefix('my')->group(function () {
         Route::get('/inspectionsPerProject', function (Request $request) {
