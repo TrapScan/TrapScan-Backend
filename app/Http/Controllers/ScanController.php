@@ -16,18 +16,17 @@ class ScanController extends Controller
 
         if($qr->trap_id) {
             $trap = Trap::find($qr->trap_id);
+            $last_inspection = $trap->inspections()->latest()->limit(1)->first();
+            $trap->last_checked = $last_inspection->updated_at->diffForHumans();
+            $trap->last_checked_by = $last_inspection->user->name ?? 'Anonymous';
+            $trap->last_caught = $trap->inspections()->where('species_caught', '!=', 'None')->first()->species_caught;
+            $trap-> total_catches = $trap->inspections()->where('species_caught', '!=', 'None')->count();
         } else {
             // The trap is unmapped, return just the code.
             // Frontend looks for nz_trap_id and will conditionally redirect
             // to the installation form or show error if needed
             $trap = ['qr_id' => $qr->code];
         }
-
-        $last_inspection = $trap->inspections()->latest()->limit(1)->first();
-        $trap->last_checked = $last_inspection->updated_at->diffForHumans();
-        $trap->last_checked_by = $last_inspection->user->name ?? 'Anonymous';
-        $trap->last_caught = $trap->inspections()->where('species_caught', '!=', 'None')->first()->species_caught;
-        $trap-> total_catches = $trap->inspections()->where('species_caught', '!=', 'None')->count();
 
         return $trap;
     }
