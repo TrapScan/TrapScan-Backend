@@ -24,9 +24,9 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/scrape', [\App\Http\Controllers\Scraper::class, 'projects']);
-Route::get('/scrape/submit/{id}', [\App\Http\Controllers\Scraper::class, 'submitInspection']);
-Route::post('/scrape/upload', [\App\Http\Controllers\Scraper::class, 'uploadTraps']);
+//Route::get('/scrape', [\App\Http\Controllers\Scraper::class, 'projects']);
+//Route::get('/scrape/submit/{id}', [\App\Http\Controllers\Scraper::class, 'submitInspection']);
+//Route::post('/scrape/upload', [\App\Http\Controllers\Scraper::class, 'uploadTraps']);
 
 Route::get('/auth/{provider}/redirect', function ($provider) {
     $enabledProvdiers = ['google', 'facebook', 'apple'];
@@ -34,7 +34,6 @@ Route::get('/auth/{provider}/redirect', function ($provider) {
         return Socialite::driver($provider)->stateless()->redirect();
     }
 });
-
 Route::get('/auth/{provider}/callback', function ($provider) {
     $enabledProvdiers = ['google', 'facebook'];
     if(in_array($provider, $enabledProvdiers)) {

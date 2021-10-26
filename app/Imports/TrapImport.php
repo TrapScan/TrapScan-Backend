@@ -20,26 +20,44 @@ class TrapImport implements ToCollection, WithHeadingRow
     */
     public $headings = [
         "Project",
-        "ID",
         "Trap_line",
+        "Trap ID",
+        "Main trap ID",
+        "Number/Code",
+        "Installed",
+        "Installed by",
         "Trap_type",
         "Trap_sub_type",
-        "Date_installed",
-        "Retired",
-        "Sensor_ID",
-        "Sensor_provider",
-        "Status",
-        "Total_kills",
-        "Lat",
+        "Latitude",
         "Lon",
         "Notes",
+        "Retired",
+        "Total kills",
+        "Last Record"
     ];
+
+    public int $notes_added;
+    public int $trap_lines_created;
+    public int $traps_added_to_lines;
+
+    public function stats() {
+        return ['notes_added' => $this->notes_added,
+            'trap_lines_created' => $this->trap_lines_created,
+            'traps_added_to_lines' => $this->traps_added_to_lines
+        ];
+    }
 
     public function collection(Collection $collection)
     {
+        $this->notes_added = 0;
+        $this->trap_lines_created = 0;
+        $this->traps_added_to_lines = 0;
         foreach ($collection as $row) {
-            $trap = Trap::where('name', $row['id'])->first();
+            $trap = Trap::where('nz_trap_id', $row['main_trap_id'])->first();
             if($trap) {
+                if(!$trap->notes) {
+                    $this->notes_added+=1;
+                }
                 $trap->notes = $row['notes'];
                 if($row['trap_line']){
                     $trap_line = TrapLine::where('name', $row['trap_line'])->first();
@@ -50,11 +68,13 @@ class TrapImport implements ToCollection, WithHeadingRow
                                'project_id' => $project->id,
                                'name' => $row['trap_line']
                             ]);
+                            $this->trap_lines_created+=1;
                         }
                     }
                     if($trap->trapline?->name !== $row['trap_line']) {
                         $trap->trapline()->associate($trap_line);
                         $trap->save();
+                        $this->traps_added_to_lines+=1;
                     }
                 }
             }

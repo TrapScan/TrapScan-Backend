@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\QRController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\Scraper;
 use App\Http\Controllers\StatsController;
 use App\Http\Resources\CoordinatorSettingsResource;
 use App\Http\Resources\UserResource;
@@ -139,6 +140,10 @@ Route::middleware('auth:sanctum')->group(function () {
      * Admin Protected Routes
      */
     Route::prefix('admin')->middleware('role:admin')->group(function () {
+
+        Route::get('/scrape', [Scraper::class, 'projects']);
+        Route::get('/scrape/submit/{id}', [Scraper::class, 'submitInspection']);
+        Route::post('/scrape/upload', [Scraper::class, 'uploadTraps']);
 
         Route::post('/qr/create', [QRController::class, 'create'])
             ->name('admin.qr.create');

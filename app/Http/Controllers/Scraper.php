@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Trap;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\DomCrawler\Crawler;
@@ -17,12 +18,36 @@ class Scraper extends Controller
     const LOGIN_URL = self::BASE_URL . "/user/login?destination=my-projects";
     const TRAP_URL = self::BASE_URL . "/project/trap_overview.json";
 
-    public function uploadTraps() {
-         Excel::import(new TrapImport, request()->file('file'), null, \Maatwebsite\Excel\Excel::CSV);
-        return true;
+    public function uploadTraps(Request $request) {
+        $user = $request->user();
+        if($user->email !== 'dylan@dylanhobbs.ie') {
+            return response()->json([
+                'Contact Dylan'
+            ], 400);
+        }
+        $validated_data = $request->validate([
+           'file' => 'required|file'
+        ]);
+        $data = new TrapImport;
+        Excel::import($data, $validated_data['file'], null, \Maatwebsite\Excel\Excel::CSV);
+        return response()->json([
+            'CSV Uploaded',
+            [
+                'notes_added' => $data->notes_added,
+                'trap_lines_created' => $data->trap_lines_created,
+                'traps_added_to_lines' => $data->traps_added_to_lines
+            ]
+        ], 200);;
     }
 
-    public function projects() {
+    public function projects(Request $request) {
+        $user = $request->user();
+        if($user->email !== 'dylan@dylanhobbs.ie') {
+            return response()->json([
+                'Contact Dylan'
+            ], 400);
+        }
+
         $loginNeeded = false;
         $client = new Client();
         $cookieJar = new CookieJar();
@@ -74,6 +99,8 @@ class Scraper extends Controller
         /*
          * Get Trap Data
          */
+        $added_traps = 0;
+        $skipped_traps = 0;
         foreach ($projects as $index => $project) {
             $traps = [];
             $link = self::BASE_URL . $project['link'];
@@ -102,21 +129,26 @@ class Scraper extends Controller
                     $traps[] = $newTrap;
                     $trap = Trap::where('nz_trap_id', $newTrap['nid'])->first();
                     if(! $trap) {
+                        $added_traps+=1;
                         Trap::create([
                             'nz_trap_id' => $newTrap['nid'],
                             'project_id' => $existing_project->id,
                             'name' => $newTrap['name'],
                             'coordinates' => new Point($newTrap['coordinates'][0], $newTrap['coordinates'][1])
                         ]);
+                    } else {
+                        $skipped_traps+=1;
                     }
                 }
                 $projects[$index]['traps'] = $traps;
             }
         }
 
-        // Add to DB
-
-        return $projects;
+        return response()->json([
+            'added' => $added_traps,
+            'skipped' => $skipped_traps,
+            'projects' => $projects
+        ], 200);
     }
 
     public function submitInspection($id) {
