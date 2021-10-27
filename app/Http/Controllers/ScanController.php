@@ -25,7 +25,7 @@ class ScanController extends Controller
             // The trap is unmapped, return just the code.
             // Frontend looks for nz_trap_id and will conditionally redirect
             // to the installation form or show error if needed
-            $trap = ['qr_id' => $qr->code];
+            $trap = ['qr_id' => $qr->qr_code];
         }
 
         return $trap;
