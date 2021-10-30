@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Imports\TrapImport;
+use App\Jobs\UploadToTrapNZ;
+use App\Models\Inspection;
 use App\Models\Project;
 use App\Models\Trap;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
@@ -151,169 +153,150 @@ class Scraper extends Controller
         ], 200);
     }
 
+    /**
+     * @param $id // TrapNZ ID -
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function submitInspection($id) {
-        $loginNeeded = false;
-        $client = new Client();
-        $cookieJar = new CookieJar();
-        try {
-            $response = $client->get(self::BASE_URL . '/my-projects', [
-                'cookies' => $cookieJar
-            ]);
-        } catch(\Exception $e) {
-            if($e->getCode() === 403) {
-                $loginNeeded = true;
-            }
-        }
-        if($loginNeeded) {
-            $response = $client->post(self::LOGIN_URL, [
-                'form_params' => [
-                    'name' => 'dylanhobbs',
-                    'pass' => 'Tarnish-Palpable5-Salsa-Outbid',
-                    'form_build_id' => '',
-                    'form_id' => 'user_login',
-                    'op' => 'Log+in'
-                ],
-                'allow_redirects' => true,
-                'cookies' => $cookieJar
-            ]);
-        }
+        $inspection = Inspection::find(14619);
+        UploadToTrapNZ::dispatch($inspection);
+        return response()->json(['message' => 'yes']);
 
-        $url = self::BASE_URL . "/node/add/trap-record?field_trap_record_trap=${id}&destination=node/${id}";
-
-        $response = $client->get( $url, [
-            'cookies' => $cookieJar
-        ]);
-        $htmlString = (string) $response->getBody();
-        $crawler = new Crawler($htmlString);
-        $formBuildID = $crawler->filter('.col-md-12 > input:nth-child(2)')->attr('value');
-        $formToken = $crawler->filter('.col-md-12 > input:nth-child(3)')->attr('value');
-        $formID = $crawler->filter('.col-md-12 > input:nth-child(4)')->attr('value');
-
-        $response = $client->request('POST', $url, [
-            'cookies' => $cookieJar,
-            'multipart' => [
-                [
-                    'name' => 'field_trap_record_date[und][0][value][date]',
-                    'contents' => '24 Aug 2021'
-                ],
-                [
-                    'name' => 'field_trap_record_date[und][0][value][time]',
-                    'contents' => '07:21'
-                ],
-                [
-                    'name' => 'field_trap_record_recorded_by[und][0][value]',
-                    'contents' => 'Dylan Test'
-                ],
-                [
-                    'name' => 'field_trap_record_species_caught[und]',
-                    'contents' => '' . $this->speciesToValue('Mouse')
-                ],
-                [
-                    'name' => 'field_gender[und]',
-                    'contents' => '_none'
-                ],
-                [
-                    'name' => 'field_maturity[und]',
-                    'contents' => '_none'
-                ],
-                [
-                    'name' => 'field_images[und][0][_weight]',
-                    'contents' => "0"
-                ],
-                [
-                    'name' => 'field_images[und][0][fid]',
-                    'contents' => "0"
-                ],
-                [
-                    'name' => 'field_images[und][0][display]',
-                    'contents' => '1'
-                ],
-                [
-                    'name' => 'field_trap_record_status[und]',
-                    'contents' => '' . $this->statusToValue('Sprung')
-                ],
-                [
-                    'name' => 'field_strikes[und][0][value]',
-                    'contents' => '1'
-                ],
-                [
-                    'name' => 'field_trap_record_trap_condition[und]',
-                    'contents' => 'OK'
-                ],
-                [
-                    'name' => 'field_trap_record_rebaited[und]',
-                    'contents' => 'Yes'
-                ],
-                [
-                    'name' => 'field_trap_record_bait_type[und][]',
-                    'contents' => '' . $this->baitToValue('Whole egg')
-                ],
-                [
-                    'name' => 'field_bait_sub_type[und][0][value]',
-                    'contents' => ''
-                ],
-                [
-                    'name' => 'changed',
-                    'contents' => ''
-                ],
-                [
-                    'name' => 'form_build_id',
-                    'contents' => $formBuildID
-                ],
-                [
-                    'name' => 'form_token',
-                    'contents' => $formToken
-                ],
-                [
-                    'name' => 'form_id',
-                    'contents' => $formID
-                ],
-                [
-                    'name' => 'additional_settings__active_tab',
-                    'contents' => ''
-                ],
-                [
-                    'name' => 'op',
-                    'contents' => 'Save'
-                ],
-            ]
-        ]);
-        return $response->getBody();
-    }
-
-//    public function submitInspection($id) {
-////        return $id;
-//        /*
-//         * Login
-//         */
-//        $browser = new HttpBrowser(HttpClient::create());
-//        $browser->request('GET', self::BASE_URL);
-//        $browser->clickLink('Log in');
-//        $browser->submitForm('Log in', [
-//            'name' => 'dylanhobbs',
-//            'pass' => 'Tarnish-Palpable5-Salsa-Outbid',
-//            'form_build_id' => '',
-//            'form_id' => 'user_login',
-//            'op' => 'Log+in'
+//        $loginNeeded = false;
+//        $client = new Client();
+//        $cookieJar = new CookieJar();
+//        try {
+//            $response = $client->get(self::BASE_URL . '/my-projects', [
+//                'cookies' => $cookieJar
+//            ]);
+//        } catch(\Exception $e) {
+//            if($e->getCode() === 403) {
+//                $loginNeeded = true;
+//            }
+//        }
+//        if($loginNeeded) {
+//            $response = $client->post(self::LOGIN_URL, [
+//                'form_params' => [
+//                    'name' =>  env('TRAP_NZ_USERNAME', 'dylan'),
+//                    'pass' => env('TRAP_NZ_PASSWORD', 'notmypassword'),
+//                    'form_build_id' => '',
+//                    'form_id' => 'user_login',
+//                    'op' => 'Log+in'
+//                ],
+//                'allow_redirects' => true,
+//                'cookies' => $cookieJar
+//            ]);
+//        }
+//
+//        // TODO: Add inspection's project ID here
+//        // Visit the correct project page to be allowed access to the submit form
+//        $project_url = self::BASE_URL . "/node/3163834";
+//        $project_response = $client->get($project_url, [
+//            'cookies' => $cookieJar
 //        ]);
 //
-//
-//        // Naviage to form
 //        $url = self::BASE_URL . "/node/add/trap-record?field_trap_record_trap=${id}&destination=node/${id}";
-//        $crawler = $browser->request('GET', $url);
 //
-//        $form = $crawler->selectButton('edit-submit')->form();
-//        $form['field_trap_record_recorded_by[und][0][value]']->setValue('Dylan Test');
-//        $form['field_trap_record_species_caught[und]']->select($this->speciesToValue('Mouse'));
-//        $form['field_trap_record_status[und]']->select($this->statusToValue('Sprung'));
-//        $form['field_trap_record_trap_condition[und]']->select('OK');
-//        $form['field_trap_record_rebaited[und]']->select('Yes');
-//        $form['field_trap_record_bait_type[und][]']->select($this->baitToValue('Whole egg'));
+//        $response = $client->get( $url, [
+//            'cookies' => $cookieJar
+//        ]);
+//        $htmlString = (string) $response->getBody();
+//        $crawler = new Crawler($htmlString);
+//        $formBuildID = $crawler->filter('.col-md-12 > input:nth-child(2)')->attr('value');
+//        $formToken = $crawler->filter('.col-md-12 > input:nth-child(3)')->attr('value');
+//        $formID = $crawler->filter('.col-md-12 > input:nth-child(4)')->attr('value');
 //
-//        $crawler = $browser->submit($form);
-//
-//        return $browser->getResponse()->getContent();
-//    }
+//        $response = $client->request('POST', $url, [
+//            'cookies' => $cookieJar,
+//            'multipart' => [
+//                [
+//                    'name' => 'field_trap_record_date[und][0][value][date]',
+//                    'contents' => '30 Oct 2021'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_date[und][0][value][time]',
+//                    'contents' => '07:21'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_recorded_by[und][0][value]',
+//                    'contents' => 'Dylan Tester 1'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_species_caught[und]',
+//                    'contents' => '' . $this->speciesToValue('Rat')
+//                ],
+//                [
+//                    'name' => 'field_gender[und]',
+//                    'contents' => '_none'
+//                ],
+//                [
+//                    'name' => 'field_maturity[und]',
+//                    'contents' => '_none'
+//                ],
+//                [
+//                    'name' => 'field_images[und][0][_weight]',
+//                    'contents' => "0"
+//                ],
+//                [
+//                    'name' => 'field_images[und][0][fid]',
+//                    'contents' => "0"
+//                ],
+//                [
+//                    'name' => 'field_images[und][0][display]',
+//                    'contents' => '1'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_status[und]',
+//                    'contents' => '' . $this->statusToValue('Sprung')
+//                ],
+//                [
+//                    'name' => 'field_strikes[und][0][value]',
+//                    'contents' => '1'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_trap_condition[und]',
+//                    'contents' => 'OK'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_rebaited[und]',
+//                    'contents' => 'Yes'
+//                ],
+//                [
+//                    'name' => 'field_trap_record_bait_type[und][]',
+//                    'contents' => '' . $this->baitToValue('Whole egg')
+//                ],
+//                [
+//                    'name' => 'field_bait_sub_type[und][0][value]',
+//                    'contents' => ''
+//                ],
+//                [
+//                    'name' => 'changed',
+//                    'contents' => ''
+//                ],
+//                [
+//                    'name' => 'form_build_id',
+//                    'contents' => $formBuildID
+//                ],
+//                [
+//                    'name' => 'form_token',
+//                    'contents' => $formToken
+//                ],
+//                [
+//                    'name' => 'form_id',
+//                    'contents' => $formID
+//                ],
+//                [
+//                    'name' => 'additional_settings__active_tab',
+//                    'contents' => ''
+//                ],
+//                [
+//                    'name' => 'op',
+//                    'contents' => 'Save'
+//                ],
+//            ]
+//        ]);
+//        return $response->getBody();
+    }
 
     private function speciesToValue($species) {
         switch ($species) {

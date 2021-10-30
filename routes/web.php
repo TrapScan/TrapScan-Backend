@@ -25,7 +25,7 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 //Route::get('/scrape', [\App\Http\Controllers\Scraper::class, 'projects']);
-//Route::get('/scrape/submit/{id}', [\App\Http\Controllers\Scraper::class, 'submitInspection']);
+Route::get('/scrape/submit/{id}', [\App\Http\Controllers\Scraper::class, 'submitInspection']);
 //Route::post('/scrape/upload', [\App\Http\Controllers\Scraper::class, 'uploadTraps']);
 
 Route::get('/auth/{provider}/redirect', function ($provider) {

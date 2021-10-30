@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendCatchNotificationToCoordinators;
+use App\Jobs\UploadToTrapNZ;
 use App\Models\Inspection;
 use App\Models\Trap;
 use Carbon\Carbon;
@@ -75,7 +76,7 @@ class InspectionController extends Controller
         }
 
         // Duplicate check
-        $oneHourAgo = Carbon::now()->subHour();
+        $oneHourAgo = Carbon::now()->subMinutes(10);
         if(env('APP_ENV') === 'local') $oneHourAgo = Carbon::now()->subSeconds(20);
         $duplicate = Inspection::where('trap_id', $trap->id)
             ->where('created_at', '>=', $oneHourAgo)->first();
@@ -103,6 +104,7 @@ class InspectionController extends Controller
             // Notifications
             if($inspection->species_caught) {
                 SendCatchNotificationToCoordinators::dispatch($inspection);
+                UploadToTrapNZ::dispatch($inspection);
             }
 
             return response()->json(['message' => 'Inspection  added', 'data' => $inspection->toArray()], 200);
