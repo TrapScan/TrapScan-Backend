@@ -41,7 +41,7 @@ class UploadToTrapNZ implements ShouldQueue
         $BASE_URL = "https://trap.nz";
         $LOGIN_URL = $BASE_URL . "/user/login?destination=my-projects";
 
-        Log::debug('Attempting to upload inspection', $this->inspection);
+        Log::debug('Attempting to upload inspection', $this->inspection->toArray());
 
         $loginNeeded = false;
         $client = new Client();
@@ -178,7 +178,11 @@ class UploadToTrapNZ implements ShouldQueue
             ]
         ]);
         if($response->getStatusCode() != 200) {
-            Log::error('Failed to upload to TrapNZ with status: ' . $response->getStatusCode(), $response->getBody());
+            Log::error('Failed to upload to TrapNZ with status: ' . $response->getStatusCode(), [
+                $response->getStatusCode(),
+                $response->getHeaders(),
+                $response->getBody()
+            ]);
             $this->fail();
         }
     }
