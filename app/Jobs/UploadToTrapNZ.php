@@ -184,6 +184,12 @@ class UploadToTrapNZ implements ShouldQueue
                 $response->getBody()
             ]);
             $this->fail();
+        } else {
+            Log::debug('Upload to trap NZ finished with status code:  ' . $response->getStatusCode(), [
+                $response->getStatusCode(),
+                $response->getHeaders(),
+                $response->getBody()
+            ]);
         }
     }
 
