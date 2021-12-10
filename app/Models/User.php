@@ -68,7 +68,7 @@ class User extends Authenticatable
     }
 
     public function catches() {
-        return $this->inspections()->whereNotNull('species_caught')->count();
+        return $this->inspections()->where('species_caught', '!=', 'None')->count();
     }
 
     /*
