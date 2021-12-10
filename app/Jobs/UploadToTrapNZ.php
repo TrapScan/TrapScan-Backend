@@ -231,11 +231,11 @@ class UploadToTrapNZ implements ShouldQueue
                 return 26;
             case "Rat":
                 return 23;
-            case "-Rat - Kiore":
+            case "Rat - Kiore":
                 return 3409;
-            case "-Rat - Norway":
+            case "Rat - Norway":
                 return 3410;
-            case "-Rat - Ship":
+            case "Rat - Ship":
                 return 3411;
             case "Stoat":
                 return 22;
@@ -293,11 +293,11 @@ class UploadToTrapNZ implements ShouldQueue
                 return 80;
             case "Dried fruit":
                 return 46;
-            case "Ferret bedding":
+            case "Ferret Bedding":
                 return 100;
-            case "Fresh fruit":
+            case "Fresh Fruit":
                 return 45;
-            case "Fresh meat":
+            case "Fresh Meat":
                 return 16;
             case "Fresh Possum":
                 return 274;
@@ -319,7 +319,7 @@ class UploadToTrapNZ implements ShouldQueue
                 return 812;
             case "Nutella":
                 return 1036;
-            case "Peanut butter":
+            case "Peanut Butter":
                 return 48;
             case "Possum Dough":
                 return 850;
