@@ -202,18 +202,21 @@ Route::middleware('auth:sanctum')->group(function () {
         $userLocation = new Point($data['long'], $data['lat']);
         $coordinatorProjects = $request->user()->isCoordinator()->pluck('id')->toArray();
 
-        return Trap::where('id', '>', '1201')
-            ->where(function ($q) {
+
+//        $traps = Trap::where('id', '>', '1201')
+        $traps = Trap::where(function ($q) {
                 $q->mapped();
-                $q->where('private', false);
 //                $q->where('trap_line_id', '!=', null); // Only show traps that are traplines
             })
             ->orWhere(function ($q) use ($coordinatorProjects) {
                 $q->whereIn('project_id', $coordinatorProjects)->noCode();
             })
             ->orderByDistance('coordinates', $userLocation, 'asc')
-            ->limit(5)
-            ->get();
+            ->limit(5);
+        if(!$coordinatorProjects || count($coordinatorProjects) <= 0) {
+            $traps->where('private', false);
+        }
+        return $traps->get();
     })->middleware(['throttle:none']);
 });
 
