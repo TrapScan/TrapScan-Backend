@@ -214,7 +214,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->orderByDistance('coordinates', $userLocation, 'asc')
             ->limit(5)
             ->get();
-    });
+    })->middleware(['throttle:none']);
 });
 
 /*
