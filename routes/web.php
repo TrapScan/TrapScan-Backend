@@ -46,6 +46,10 @@ Route::get('/auth/{provider}/callback', function ($provider) {
         if($existingUser) {
             $existingUser = $existingUser->user()->first();
         }
+        $alreadyUsedEmailCheck = User::where('email', $user->getEmail())->first();
+        if($alreadyUsedEmailCheck) {
+            $existingUser = $alreadyUsedEmailCheck;
+        }
         if(! $existingUser) {
             $createUser = User::create([
                 'name' => $user->getName(),
