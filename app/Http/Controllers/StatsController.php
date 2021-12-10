@@ -14,7 +14,7 @@ class StatsController extends Controller
 {
     public function kpis() {
         $total_users = User::count() ?? 1;
-        $total_catches = Inspection::whereNotNull('species_caught')->count();
+        $total_catches = Inspection::where('species_caught', '!=', 'None')->count();
         $total_inspections = Inspection::count();
         $total_traps = Trap::count();
         $total_projects = Project::count() ?? 1;
