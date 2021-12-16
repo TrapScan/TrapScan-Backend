@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendCatchNotificationToCoordinators;
+use App\Jobs\SendTrapIssueNotificationToCoordinators;
 use App\Jobs\UploadToTrapNZ;
 use App\Models\Inspection;
 use App\Models\Trap;
@@ -97,14 +98,17 @@ class InspectionController extends Controller
                 'rebaited' => $validated_data['rebaited'] === 'Yes' || $validated_data['rebaited'] === 'yes',
                 'bait_type' => $validated_data['bait_type'],
                 'trap_condition' => $validated_data['trap_condition'],
-                'notes' => $validated_data['notes'],
-                'words' => $validated_data['notes'],
+                'notes' => $validated_data['notes'] ?? null,
+                'words' => $validated_data['words'],
             ]);
 
             // Notifications
-            if($inspection->species_caught) {
+            if($inspection->species_caught && $inspection->species_caught !== 'None') {
                 SendCatchNotificationToCoordinators::dispatch($inspection);
                 UploadToTrapNZ::dispatch($inspection);
+            }
+            if($inspection->trap_condition === 'Needs maintenance') {
+                SendTrapIssueNotificationToCoordinators::dispatch($inspection);
             }
 
             return response()->json(['message' => 'Inspection  added', 'data' => $inspection->toArray()], 200);

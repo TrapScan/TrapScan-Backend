@@ -31,4 +31,11 @@ class UserProject extends Pivot
         }
         return false;
     }
+
+    public function shouldNotifyTrapIssue() {
+        if ($this->notify_problems) {
+            return true;
+        }
+        return false;
+    }
 }

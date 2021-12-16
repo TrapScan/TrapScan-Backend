@@ -24,6 +24,7 @@ class CoordinatorSettingsResource extends ResourceCollection
                 $builder_array['notify_catches'] = $project->pivot->notify_catches;
                 $builder_array['name'] = $project->name;
                 $builder_array['catch_filter'] = $project->pivot->catch_filter ?? null;
+                $builder_array['notify_problems'] = $project->pivot->notify_problems;
                 $data_array[] = $builder_array;
             }
         }
