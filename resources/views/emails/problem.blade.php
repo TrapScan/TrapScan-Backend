@@ -1,8 +1,7 @@
 @component('vendor.mail.html.message')
 # *{{ $user->name }}* reprted an issue with trap:
-**TrapNZ ID:** *{{ $trap->nz_trap_id }}*<br>
+**TrapNZ ID:** *{{ $trap->name }}*<br>
 **QR ID:** *{{ $trap->qr_id }}*<br>
-**TrapNZ Name:** *{{ $trap->name  }}*
 
 ## The issue they reported is:<br>
 @component('vendor.mail.html.panel')
