@@ -64,7 +64,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $default_settings = ['theme' => 'default', 'dark_mode' => true];
+        $default_settings = ['theme' => 'default', 'dark_mode' => false];
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
