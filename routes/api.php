@@ -179,6 +179,52 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('admin.qr.unmapped.project');
         Route::get('/nocode', [QRController::class, 'noCode'])
             ->name('admin.qr.unmapped.nocode');
+        Route::get('/projects', function(Request $request) {
+            return Project::with('users')->get();
+        })->name('admin.projects');
+        Route::get('/users', function(Request $request) {
+           return User::with('projectsAll')->get();
+        });
+        Route::post('/userProject', function(Request $request) {
+            $validated_data = $request->validate([
+                'userId' => 'required',
+                'projectId' => 'required'
+            ]);
+
+            $project = Project::find($validated_data['projectId']);
+            $user = User::find($validated_data['userId']);
+
+            return $user->projects()->attach($project);
+        });
+        Route::post('/remove/userProject', function(Request $request) {
+            $validated_data = $request->validate([
+                'userId' => 'required',
+                'projectId' => 'required'
+            ]);
+
+            $project = Project::find($validated_data['projectId']);
+            $user = User::find($validated_data['userId']);
+
+            return $user->projects()->detach($project);
+        });
+        Route::put('/userProject', function(Request $request) {
+            $validated_data = $request->validate([
+                'userId' => 'required',
+                'projectId' => 'required',
+                'value' => 'required',
+                'key' => 'required'
+            ]);
+
+            if($validated_data['key'] === 'coordinator') {
+                $project = Project::find($validated_data['projectId']);
+                $user = User::find($validated_data['userId']);
+
+                $user->projects()->updateExistingPivot($project->id, [
+                    'coordinator' => $validated_data['value']
+                ]);
+            }
+        });
+
     });
 
     /*
@@ -203,9 +249,10 @@ Route::middleware('auth:sanctum')->group(function () {
         $coordinatorProjects = $request->user()->isCoordinator()->pluck('id')->toArray();
 
 
-//        $traps = Trap::where('id', '>', '1201')
+        //        $traps = Trap::
         $traps = Trap::where(function ($q) {
                 $q->mapped();
+//                $q->where('private', false);
 //                $q->where('trap_line_id', '!=', null); // Only show traps that are traplines
             })
             ->orWhere(function ($q) use ($coordinatorProjects) {

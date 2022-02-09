@@ -55,6 +55,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Project::class)->using(UserProject::class);
     }
 
+    public function projectsAll() {
+        return $this->belongsToMany(Project::class)
+            ->using(UserProject::class)
+            ->withPivot('coordinator', 'notify_catches', 'notify_inspections', 'notify_problems', 'catch_filter');
+    }
+
     public function traps() {
         return $this->hasMany(Trap::class);
     }
