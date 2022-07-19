@@ -22,9 +22,14 @@ class Scraper extends Controller
 
     public function uploadTraps(Request $request) {
         $user = $request->user();
-        if($user->email !== 'dylan@dylanhobbs.ie') {
+//        if($user->email !== 'dylan@dylanhobbs.ie') {
+//            return response()->json([
+//                'Contact Dylan'
+//            ], 400);
+//        }
+        if(!$user->hasRole('admin')) {
             return response()->json([
-                'Contact Dylan'
+                'Connect admin.'
             ], 400);
         }
         $validated_data = $request->validate([
@@ -44,9 +49,16 @@ class Scraper extends Controller
 
     public function projects(Request $request) {
         $user = $request->user();
-        if($user->email !== 'dylan@dylanhobbs.ie') {
+
+//        if($user->email !== 'dylan@dylanhobbs.ie') {
+//            return response()->json([
+//                'Contact Dylan'
+//            ], 400);
+//        }
+
+        if(!$user->hasRole('admin')) {
             return response()->json([
-                'Contact Dylan'
+                'Connect admin.'
             ], 400);
         }
 

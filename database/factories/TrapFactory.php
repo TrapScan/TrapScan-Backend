@@ -15,7 +15,7 @@ class TrapFactory extends Factory
      *
      * @var string
      */
-    protected string $model = Trap::class;
+    protected  $model = Trap::class;
 
     /**
      * Define the model's default state.

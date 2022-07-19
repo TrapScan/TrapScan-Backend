@@ -99,6 +99,15 @@ class User extends Authenticatable
             ->get();
     }
 
+    public function isInProject() {
+        return $this->projects()
+            ->withPivot(Project::USER_PROJECT_COORDINATOR_SETTINGS)
+            ->with(['traps' => function ($q) {
+                return $q->whereNull('qr_id');
+            }])
+            ->get();
+    }
+
     public function isCoordinatorOf(Project $project) {
         return $this->projects()->wherePivot('coordinator', '=', true)
             ->where('project_id', $project->id)

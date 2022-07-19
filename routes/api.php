@@ -127,7 +127,7 @@ Route::middleware('auth:sanctum')->group(function () {
         } else {
             return response()->json([false], 400);
         }
-    })->name('user.is.coordinator');
+    })->name('user.is.coordinator_param');
 
     Route::prefix('inspection')->group(function () {
         Route::post('/create', [InspectionController::class, 'create'])
@@ -276,7 +276,7 @@ Route::post('/inspection/anon/create', [InspectionController::class, 'createAnon
 
 Route::prefix('anon')->group(function () {
     Route::get('/scan/{qr_id}', [ScanController::class, 'anonScan'])
-        ->name('scan.qr');
+        ->name('anon.scan.qr');
 });
 
 Route::prefix('stats')->group(function () {

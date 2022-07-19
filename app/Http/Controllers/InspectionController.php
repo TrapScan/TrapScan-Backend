@@ -105,8 +105,12 @@ class InspectionController extends Controller
             // Notifications
             if($inspection->species_caught && $inspection->species_caught !== 'None') {
                 SendCatchNotificationToCoordinators::dispatch($inspection);
+            }
+
+            if($inspection->status != 'Scrap' && $inspection->recorded_by != null && !$inspection->rebaited) {
                 UploadToTrapNZ::dispatch($inspection);
             }
+
             if($inspection->trap_condition === 'Needs maintenance') {
                 SendTrapIssueNotificationToCoordinators::dispatch($inspection);
             }

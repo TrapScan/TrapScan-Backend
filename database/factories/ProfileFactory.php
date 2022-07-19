@@ -12,7 +12,7 @@ class ProfileFactory extends Factory
      *
      * @var string
      */
-    protected string $model = Profile::class;
+    protected  $model = Profile::class;
 
     /**
      * Define the model's default state.
