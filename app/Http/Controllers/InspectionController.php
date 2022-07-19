@@ -69,7 +69,7 @@ class InspectionController extends Controller
             'trap_last_checked' => 'nullable|date',
             'upload_to_nz' => 'required',
         ]);
-
+        Log::debug($validated_data);
         $trap = Trap::where('qr_id', $validated_data['QR_ID'])->first();
         if (!$trap) {
             return response()->json([

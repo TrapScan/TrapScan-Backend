@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
         "maatwebsite/excel": "^3.1",
+        "marvinlabs/laravel-discord-logger": "^1.2",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "socialiteproviders/apple": "^5.0",
         "socialiteproviders/facebook": "^4.1",
