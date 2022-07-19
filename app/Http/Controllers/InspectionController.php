@@ -89,7 +89,6 @@ class InspectionController extends Controller
                 'data' => $duplicate->toArray()
             ],200);
         } else {
-            dump($validated_data);
             $inspection = Inspection::create([
                 'date' => $validated_data['date'],
                 'trap_id' => $trap->id,
