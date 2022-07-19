@@ -90,7 +90,7 @@ class QRController extends Controller
         // Check if Pcord or Admin
         $user = $request->user();
         $project = $trap->project;
-        if($user->hasRole('admin') || $user->isCoordinatorOf($project)) {
+        //if($user->hasRole('admin') || $user->isCoordinatorOf($project)) {
             // Map new code
             $trap->qr_id = $qr->qr_code;
             $qr->trap_id = $trap->id;
@@ -107,11 +107,11 @@ class QRController extends Controller
                 'trap' => $trap,
                 'message' => 'Trap has been mapped successfully'
             ]);
-        } else {
-            return response()->json([
-                'message' => "You don't have permission to do that"
-            ], 403);
-        }
+//        } else {
+//            return response()->json([
+//                'message' => "You don't have permission to do that"
+//            ], 403);
+//        }
     }
 
     /*
