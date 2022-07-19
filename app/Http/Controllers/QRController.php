@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\QR;
 use App\Models\Trap;
+use App\Models\UserProject;
 use Illuminate\Http\Request;
 
 class QRController extends Controller
@@ -55,7 +56,19 @@ class QRController extends Controller
     }
 
     public function noCode(Request $request) {
+        $user = $request->user();
+//        if($user && $user->hasRole('admin')){
+//            return Trap::select('id', 'project_id', 'nz_trap_id', 'name', 'coordinates', 'qr_id')
+//                ->noCode()->with('project')->get();
+//        }
+        $projects = $user->isInProject();
+        $ids = collect();
+        foreach ($projects as $pr){
+            $ids->push($pr->id);
+        }
+
         return Trap::select('id', 'project_id', 'nz_trap_id', 'name', 'coordinates', 'qr_id')
+            ->whereIn('project_id',$ids)
                 ->noCode()->with('project')->get();
     }
 
