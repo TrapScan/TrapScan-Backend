@@ -135,7 +135,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/show/{inspection}', [InspectionController::class, 'show'])
             ->name('inspection.show');
     });
-
+    Route::get('/nocode', [QRController::class, 'noCode'])
+        ->name('qr.unmapped.nocode');
     /*
      * Admin Protected Routes
      */
