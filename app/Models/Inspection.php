@@ -33,6 +33,7 @@ class Inspection extends Model
         'notes',
         'words',
         'anon',
+        'upload_to_nz'
     ];
 
     public function trap() {

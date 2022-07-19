@@ -67,6 +67,7 @@ class InspectionController extends Controller
             'notes' => 'nullable|string',
             'words' => 'required',
             'trap_last_checked' => 'nullable|date',
+            'upload_to_nz' => 'required',
         ]);
 
         $trap = Trap::where('qr_id', $validated_data['QR_ID'])->first();
@@ -88,6 +89,7 @@ class InspectionController extends Controller
                 'data' => $duplicate->toArray()
             ],200);
         } else {
+            dump($validated_data);
             $inspection = Inspection::create([
                 'date' => $validated_data['date'],
                 'trap_id' => $trap->id,
@@ -100,14 +102,14 @@ class InspectionController extends Controller
                 'trap_condition' => $validated_data['trap_condition'],
                 'notes' => $validated_data['notes'] ?? null,
                 'words' => $validated_data['words'],
+                'upload_to_nz' => $validated_data['upload_to_nz'] ?? 0,
             ]);
-
             // Notifications
             if($inspection->species_caught && $inspection->species_caught !== 'None') {
                 SendCatchNotificationToCoordinators::dispatch($inspection);
             }
 
-            if($inspection->status != 'Sprung' && $inspection->recorded_by != null && !$inspection->rebaited) {
+            if($inspection->upload_to_nz == 1 ) {
                 UploadToTrapNZ::dispatch($inspection);
             }
 

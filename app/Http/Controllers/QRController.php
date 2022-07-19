@@ -57,10 +57,10 @@ class QRController extends Controller
 
     public function noCode(Request $request) {
         $user = $request->user();
-//        if($user && $user->hasRole('admin')){
-//            return Trap::select('id', 'project_id', 'nz_trap_id', 'name', 'coordinates', 'qr_id')
-//                ->noCode()->with('project')->get();
-//        }
+        if($user && $user->hasRole('admin')){
+            return Trap::select('id', 'project_id', 'nz_trap_id', 'name', 'coordinates', 'qr_id')
+                ->noCode()->with('project')->get();
+        }
         $projects = $user->isInProject();
         $ids = collect();
         foreach ($projects as $pr){
