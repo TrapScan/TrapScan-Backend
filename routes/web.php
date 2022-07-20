@@ -17,7 +17,6 @@ use Illuminate\Http\Request;
 |
 */
 Route::get('/', function () {
-    Log::debug('Test data');
     return view('welcome');
 });
 
