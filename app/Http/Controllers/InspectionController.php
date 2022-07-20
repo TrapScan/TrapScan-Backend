@@ -107,7 +107,7 @@ class InspectionController extends Controller
                 SendCatchNotificationToCoordinators::dispatch($inspection);
             }
 
-            if($inspection->upload_to_nz == 1 ) {
+            if($inspection->upload_to_nz) {
                 UploadToTrapNZ::dispatch($inspection);
             }
 
