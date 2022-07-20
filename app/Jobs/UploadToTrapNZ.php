@@ -105,7 +105,7 @@ class UploadToTrapNZ implements ShouldQueue
                 ],
                 [
                     'name' => 'field_trap_record_notes[und][0][value]',
-                    'contents'=>$this->inspection->notes ?? 'TrapScan'
+                    'contents'=> 'TrapScan '.$this->inspection->notes ?? 'TrapScan'
                 ],
                 [
                     'name' => 'field_trap_record_species_caught[und]',
