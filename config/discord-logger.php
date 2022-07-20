@@ -10,6 +10,7 @@ return [
         'avatar_url' => null,
     ],
 
+
     /**
      * The converter to use to turn a log record into a discord message
      *
