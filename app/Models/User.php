@@ -79,12 +79,14 @@ class User extends Authenticatable
     }
 
     public function catches_per_day() {
-        return $this->inspections()
+        $data = $this->inspections()
             ->where('species_caught', '!=', 'None')
             ->whereDate('created_at', Carbon::today())
             ->get()
             ->countBy('species_caught')
             ->sortDesc();
+
+        return (count($data) == 0 ? null : $data);
     }
     /*
      * Returns the simple project and inspection count for each of a users projects
