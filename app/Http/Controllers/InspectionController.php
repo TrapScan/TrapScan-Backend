@@ -61,14 +61,15 @@ class InspectionController extends Controller
             'strikes' => 'required',
             'species_caught' => 'required',
             'status' => 'required',
+            'bait_type'=>'nullable|string',
             'rebaited' => 'required',
-            'bait_type' => 'required',
             'trap_condition' => 'required',
             'notes' => 'nullable|string',
             'words' => 'required',
             'trap_last_checked' => 'nullable|date',
             'upload_to_nz' => 'required',
         ]);
+
         $trap = Trap::where('qr_id', $validated_data['QR_ID'])->first();
         if (!$trap) {
             return response()->json([
@@ -96,7 +97,7 @@ class InspectionController extends Controller
                 'species_caught' => $validated_data['species_caught'],
                 'status' => $validated_data['status'],
                 'rebaited' => $validated_data['rebaited'] === 'Yes' || $validated_data['rebaited'] === 'yes',
-                'bait_type' => $validated_data['bait_type'],
+                'bait_type' => ($validated_data['bait_type'] != null ? $validated_data['bait_type'] : 'None'),
                 'trap_condition' => $validated_data['trap_condition'],
                 'notes' => $validated_data['notes'] ?? null,
                 'words' => $validated_data['words'],
