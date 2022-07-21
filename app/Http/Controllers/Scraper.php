@@ -44,7 +44,7 @@ class Scraper extends Controller
                 'trap_lines_created' => $data->trap_lines_created,
                 'traps_added_to_lines' => $data->traps_added_to_lines
             ]
-        ], 200);;
+        ], 200);
     }
 
     public function projects(Request $request) {

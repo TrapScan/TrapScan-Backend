@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -77,6 +78,14 @@ class User extends Authenticatable
         return $this->inspections()->where('species_caught', '!=', 'None')->count();
     }
 
+    public function catches_per_day() {
+        return $this->inspections()
+            ->where('species_caught', '!=', 'None')
+            ->whereDate('created_at', Carbon::today())
+            ->get()
+            ->countBy('species_caught')
+            ->sortDesc();
+    }
     /*
      * Returns the simple project and inspection count for each of a users projects
      */
