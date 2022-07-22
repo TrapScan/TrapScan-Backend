@@ -56,7 +56,7 @@ class InspectionController extends Controller
         $validated_data = $request->validate([
             'QR_ID' => 'required',
             'code' => 'required',
-            'date' => 'required|date|date_format:Y-m-d H:i:s',
+            'date_format' => 'required',
             'recorded_by' => 'nullable|integer',
             'strikes' => 'required',
             'species_caught' => 'required',
@@ -69,7 +69,7 @@ class InspectionController extends Controller
             'trap_last_checked' => 'nullable|date',
             'upload_to_nz' => 'required',
         ]);
-
+        Log::debug($validated_data);
         $trap = Trap::where('qr_id', $validated_data['QR_ID'])->first();
         if (!$trap) {
             return response()->json([
@@ -90,7 +90,7 @@ class InspectionController extends Controller
             ],200);
         } else {
             $inspection = Inspection::create([
-                'date' => $validated_data['date'],
+                'date' => date('Y-m-d h:i:s', strtotime($validated_data['date_format'])) ?? Carbon::now(),
                 'trap_id' => $trap->id,
                 'recorded_by' => $request->user()->id,
                 'strikes' => $validated_data['strikes'],
