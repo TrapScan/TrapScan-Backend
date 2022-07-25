@@ -7,6 +7,7 @@ use App\Jobs\UploadToTrapNZ;
 use App\Models\Inspection;
 use App\Models\Project;
 use App\Models\Trap;
+use App\Models\TrapLine;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -20,20 +21,21 @@ class Scraper extends Controller
     const LOGIN_URL = self::BASE_URL . "/user/login?destination=my-projects";
     const TRAP_URL = self::BASE_URL . "/project/trap_overview.json";
 
-    public function uploadTraps(Request $request) {
+    public function uploadTraps(Request $request)
+    {
         $user = $request->user();
 //        if($user->email !== 'dylan@dylanhobbs.ie') {
 //            return response()->json([
 //                'Contact Dylan'
 //            ], 400);
 //        }
-        if(!$user->hasRole('admin')) {
+        if (!$user->hasRole('admin')) {
             return response()->json([
                 'Connect admin.'
             ], 400);
         }
         $validated_data = $request->validate([
-           'file' => 'required|file'
+            'file' => 'required|file'
         ]);
         $data = new TrapImport;
         Excel::import($data, $validated_data['file'], null, \Maatwebsite\Excel\Excel::CSV);
@@ -47,7 +49,110 @@ class Scraper extends Controller
         ], 200);
     }
 
-    public function projects(Request $request) {
+    public function scrapeSingleTrap(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->isCoordinator()) {
+            return response()->json([
+                'You do not have permission to do this action'
+            ], 401);
+        }
+
+        $validated_data = $request->validate([
+            'nz_id' => 'required'
+        ]);
+
+        $existingTrap = Trap::where('nz_trap_id', $validated_data['nz_id'])->exists();
+        if($existingTrap) {
+            return response()->json([
+                'message' => 'This trap is already in TrapScan'
+            ], 400);
+        }
+
+        try {
+            $loginNeeded = false;
+            $client = new Client();
+            $cookieJar = new CookieJar();
+            try {
+                $response = $client->get(self::BASE_URL . '/my-projects', [
+                    'cookies' => $cookieJar
+                ]);
+            } catch (\Exception $e) {
+                if ($e->getCode() === 403) {
+                    $loginNeeded = true;
+                }
+            }
+            if ($loginNeeded) {
+                $response = $client->post(self::LOGIN_URL, [
+                    'form_params' => [
+                        'name' => env('TRAP_NZ_USERNAME', 'dylan'),
+                        'pass' => env('TRAP_NZ_PASSWORD', 'notmypassword'),
+                        'form_build_id' => '',
+                        'form_id' => 'user_login',
+                        'op' => 'Log+in'
+                    ],
+                    'allow_redirects' => true,
+                    'cookies' => $cookieJar
+                ]);
+            }
+            try {
+                $response = $client->get(self::BASE_URL . '/node/' . $validated_data['nz_id'], [
+                    'cookies' => $cookieJar
+                ]);
+            } catch(\Exception $e) {
+                return response()->json([
+                    'message' => 'This trap does not exist on Trap NZ'
+                ], 401);
+            }
+
+            $htmlString = (string)$response->getBody();
+            $crawler = new Crawler($htmlString);
+            $newTrap = [];
+
+            $lat = $crawler->filter('div.field:nth-child(6) > div:nth-child(2) > div:nth-child(1)')->text();
+            $long = $crawler->filter('div.field:nth-child(7) > div:nth-child(2) > div:nth-child(1)')->text();
+            $name = $crawler->filter('.page-header')->text();
+            $project = $crawler->filter('.navbar-text > strong:nth-child(1) > a:nth-child(1)')->attr('href');
+            $project_id_regex = [];
+            $project = preg_match('/\d+/', $project, $project_id_regex);
+            $project = $project_id_regex[0];
+
+            // TODO: Need to add nz_id to traplines to make sure it doesnt exist already, name is not unique
+//            $trapLine = $crawler->filter('div.field:nth-child(5) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1)')->attr('href');
+//            $trapline_id_regex = [];
+//            preg_match('/\d+/', $trapLine, $trapline_id_regex);
+//            $trapLine = $trapline_id_regex[0];
+//            $trapline_name = $crawler->filter('div.field:nth-child(5) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1)')->text();
+
+            $newTrap['coordinates'] = new Point($long, $lat);
+            $newTrap['name'] = $name;
+            $newTrap['nz_trap_id'] = $validated_data['nz_id'];
+            $newTrap['project_id'] = $project;
+
+            $existingProject = Project::where('nz_id', $project)->first();
+            if (!$existingProject) throw new \Exception('This project is not part of TrapScan. ' . $newTrap['project_id'] . ' was not found');
+
+            $newTrap['project_id'] = $existingProject->id;
+            if(!$user->isCoordinatorOf($existingProject)) {
+                return response()->json([
+                    'message' => 'You do not have coordinator access to this project'
+                ], 401);
+            }
+            
+            return Trap::create([
+                'nz_trap_id' => $newTrap['nz_trap_id'],
+                'project_id' => $newTrap['project_id'],
+                'name' => $newTrap['name'],
+                'coordinates' => $newTrap['coordinates']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong', 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function projects(Request $request)
+    {
         $user = $request->user();
 
 //        if($user->email !== 'dylan@dylanhobbs.ie') {
@@ -56,7 +161,7 @@ class Scraper extends Controller
 //            ], 400);
 //        }
 
-        if(!$user->hasRole('admin')) {
+        if (!$user->hasRole('admin')) {
             return response()->json([
                 'Connect admin.'
             ], 400);
@@ -69,12 +174,12 @@ class Scraper extends Controller
             $response = $client->get(self::BASE_URL . '/my-projects', [
                 'cookies' => $cookieJar
             ]);
-        } catch(\Exception $e) {
-            if($e->getCode() === 403) {
+        } catch (\Exception $e) {
+            if ($e->getCode() === 403) {
                 $loginNeeded = true;
             }
         }
-        if($loginNeeded) {
+        if ($loginNeeded) {
             $response = $client->post(self::LOGIN_URL, [
                 'form_params' => [
                     'name' => env('TRAP_NZ_USERNAME', 'dylan'),
@@ -91,14 +196,14 @@ class Scraper extends Controller
         $response = $client->get(self::BASE_URL . '/my-projects', [
             'cookies' => $cookieJar
         ]);
-        $htmlString = (string) $response->getBody();
+        $htmlString = (string)$response->getBody();
         $crawler = new Crawler($htmlString);
 
         $projects = [];
         /*
          * Get Basic Trap Information
          */
-        foreach ($crawler->filter('tbody > tr') as  $node) {
+        foreach ($crawler->filter('tbody > tr') as $node) {
             $crawler = new Crawler($node);
             $project = [];
             $project['link'] = $crawler->children()->eq(0)->children()->eq(0)->attr('href');
@@ -123,15 +228,15 @@ class Scraper extends Controller
                 'cookies' => $cookieJar
             ]);
             $existing_project = Project::where('name', $project['name'])->first();
-            if(! $existing_project) {
+            if (!$existing_project) {
                 $existing_project = Project::create([
-                   'name' => $project['name'],
+                    'name' => $project['name'],
                     'description' => 'Fetch test'
                 ]);
             }
             // Fetch Trap List
             $response = $client->get(self::TRAP_URL, [
-                'cookies'=> $cookieJar
+                'cookies' => $cookieJar
             ]);
             if ($response->getBody()) {
                 $trapDta = json_decode($response->getBody(), true);
@@ -142,8 +247,8 @@ class Scraper extends Controller
                     $newTrap['nid'] = $trap['properties']['nid'];
                     $traps[] = $newTrap;
                     $trap = Trap::where('nz_trap_id', $newTrap['nid'])->first();
-                    if(! $trap) {
-                        $added_traps+=1;
+                    if (!$trap) {
+                        $added_traps += 1;
                         Trap::create([
                             'nz_trap_id' => $newTrap['nid'],
                             'project_id' => $existing_project->id,
@@ -151,7 +256,7 @@ class Scraper extends Controller
                             'coordinates' => new Point($newTrap['coordinates'][0], $newTrap['coordinates'][1])
                         ]);
                     } else {
-                        $skipped_traps+=1;
+                        $skipped_traps += 1;
                     }
                 }
                 $projects[$index]['traps'] = $traps;
@@ -169,7 +274,8 @@ class Scraper extends Controller
      * @param $id // TrapNZ ID -
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function submitInspection($id) {
+    public function submitInspection($id)
+    {
         $inspection = Inspection::find(14619);
         UploadToTrapNZ::dispatch($inspection);
         return response()->json(['message' => 'yes']);
@@ -310,7 +416,8 @@ class Scraper extends Controller
 //        return $response->getBody();
     }
 
-    private function speciesToValue($species) {
+    private function speciesToValue($species)
+    {
         switch ($species) {
             case "None":
                 return 82;
@@ -367,8 +474,9 @@ class Scraper extends Controller
         }
     }
 
-    private function statusToValue($status) {
-        switch($status) {
+    private function statusToValue($status)
+    {
+        switch ($status) {
             case "Removed for Repair":
                 return 2615;
             case "Sprung":
@@ -390,8 +498,9 @@ class Scraper extends Controller
         }
     }
 
-    private function baitToValue($bait) {
-        switch($bait) {
+    private function baitToValue($bait)
+    {
+        switch ($bait) {
             case "Carrot":
                 return 98;
             case "Lure-it Salmon Spray":
