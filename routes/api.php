@@ -106,7 +106,7 @@ Route::middleware('auth:sanctum')->group(function () {
             if ($request->user()->updateCatchFilter($validated_data)) {
                 return response()->json(['message' => 'Catch filter updated!'], 200);
             } else {
-                return response()->json(['mesaage' => 'Error: Could not update catch filter'], 400);
+                return response()->json(['message' => 'Error: Could not update catch filter'], 400);
             }
         });
     });
@@ -128,6 +128,8 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->json([false], 400);
         }
     })->name('user.is.coordinator_param');
+
+    Route::get('/scrape/single', [Scraper::class, 'scrapeSingleTrap'])->name('scrape-single-trap');
 
     Route::prefix('inspection')->group(function () {
         Route::post('/create', [InspectionController::class, 'create'])
